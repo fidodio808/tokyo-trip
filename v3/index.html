@@ -721,6 +721,8 @@ button{font:inherit;color:inherit;cursor:pointer}
 .pick{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px}.pick .chip{min-height:44px;padding:0 6px}
 #toast{position:fixed;left:50%;bottom:calc(var(--tab) + var(--sb) + 76px);transform:translateX(-50%);background:#1d1d1fe6;color:#fff;padding:9px 16px;border-radius:20px;font-size:13.5px;z-index:100;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap}#toast.on{opacity:1}
 .hide{display:none!important}
+.thm{display:flex;gap:10px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}.thm::-webkit-scrollbar{display:none}
+.tc{flex:none;width:72%;max-width:280px;min-height:64px;scroll-snap-align:start;text-align:left;border:1px solid #f5c9a8;background:#fff8f2;border-radius:14px;padding:9px 12px;display:flex;flex-direction:column;gap:2px;position:relative}.tc b{font-size:15px;color:#9a3412}.tc small{font-size:12px;color:var(--mut);line-height:1.35}.tc i{position:absolute;right:10px;top:9px;font-style:normal;font-size:11px;color:#fff;background:#9a3412;border-radius:8px;padding:0 6px}.tc.on{border-color:#9a3412;box-shadow:0 0 0 1.5px #9a3412 inset}.tc.on b{padding-right:52px}.tc.rs{width:auto;min-width:110px;border-color:var(--line);background:#fff}.tc.rs b{color:var(--ink)}
 </style></head><body>
 <header id="top"></header>
 <section id="pickv"></section><button id="bar" onclick="setTab('plan')"></button>
@@ -742,7 +744,8 @@ const TN={hi:"高端必吃",lo:"平价口碑"},TC={hi:"#9a3412",lo:"#0f766e"};
 const DAYS=[{n:"周五",c:"#c2410c",slots:[0],full:"Day 1 周五 · 美学起点 → 麻布台"},{n:"周六",c:"#1d4ed8",slots:[1,2,3],full:"Day 2 周六 · 南青山扫荡 → Shibuya Sky"},{n:"周日",c:"#15803d",slots:[4,5],full:"Day 3 周日 · 中目黑慢调 → 返程"}];
 const SLOTS=["周五下午","周六上午","周六下午","周六傍晚","周日上午","周日下午"],SDAY=[0,1,1,1,2,2];
 const gm=p=>"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(p.a?p.q+" "+p.a:p.q);
-const $=s=>document.querySelector(s);const K="tokyoV3b";
+const $=s=>document.querySelector(s);
+const PE={A:"🛍️",B:"🌊",C:"🌿"};const ptn=pid=>{const P=DATA.plans.find(p=>p.id==pid);return P?(P.name.split("·").slice(1).join("·").trim()||P.name):""};const ptl=pid=>(PE[pid]||"")+" "+ptn(pid);const K="tokyoV3b";
 function slotOfTime(day,t){const h=parseInt(t)||12;return day==1?0:day==2?(h<12?1:h<15?2:3):(h<12?4:5)}
 function defaultMy(){const m=SLOTS.map(()=>[]);DATA.days.forEach(x=>{if(!x.id||!x.day||!PL[x.id])return;const s=slotOfTime(x.day,x.time);if(!m[s].includes(x.id))m[s].push(x.id)});return m}
 let S={my:defaultMy(),day:0,tab:"pick",plan:"",split:45};
@@ -757,16 +760,16 @@ function addTo(id,si){const w=where(id);if(w>=0)S.my[w].splice(S.my[w].indexOf(i
 function unassign(id){const w=where(id);if(w<0)return;S.my[w].splice(S.my[w].indexOf(id),1);save();toast("已移出行程");renderAll()}
 function rm(si,j){S.my[si].splice(j,1);save();toast("已移除");renderAll()}
 function mv(si,j,d){const a=S.my[si],k=j+d;if(k<0||k>=a.length)return;[a[j],a[k]]=[a[k],a[j]];save();renderAll()}
-function applyPlan(pid){const P=DATA.plans.find(p=>p.id==pid);if(!P)return;const m=SLOTS.map(()=>[]);P.slots.forEach(s=>{const i=SLOTS.indexOf(s.slot);if(i>=0)m[i]=s.ids.filter(id=>PL[id])});S.my=m;S.plan=pid;save();toast("已套用方案 "+pid);renderAll()}
+function applyPlan(pid){const P=DATA.plans.find(p=>p.id==pid);if(!P)return;const m=SLOTS.map(()=>[]);P.slots.forEach(s=>{const i=SLOTS.indexOf(s.slot);if(i>=0)m[i]=s.ids.filter(id=>PL[id])});S.my=m;S.plan=pid;save();toast("已套用 "+ptl(pid));renderAll()}
 function resetAll(){S.my=defaultMy();S.plan="";save();toast("已重置为默认行程");renderAll()}
 function setTab(t){S.tab=t;save();$("#pickv").classList.toggle("hide",t!="pick");$("#bar").classList.toggle("hide",t!="pick");$("#planv").classList.toggle("hide",t!="plan");document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.t==t));topbar();if(t=="plan")setTimeout(()=>{map.invalidateSize();drawMap(true)},30);window.scrollTo(0,0)}
 function setDay(d){S.day=(d+3)%3;save();topbar();renderPlan(true)}
-function topbar(){$("#top").innerHTML=S.tab=="pick"?`<b>挑选</b><small>${S.plan?"方案 "+S.plan+" · ":""}已选 ${total()} 项</small>`:`<b>${DAYS[S.day].full.split(" · ")[0]}</b><small>${DAYS[S.day].full.split(" · ")[1]}</small>`}
+function topbar(){$("#top").innerHTML=S.tab=="pick"?`<b>挑选</b><small>${S.plan?ptl(S.plan)+" · ":""}已选 ${total()} 项</small>`:`<b>${DAYS[S.day].full.split(" · ")[0]}</b><small>${DAYS[S.day].full.split(" · ")[1]}</small>`}
 function tagsOf(p){let t=`<span class="tag">${ZN[p.z]||""}</span><span class="tag">${CI[p.c]} ${CN[p.c]}</span>`;if(p.c=="dine")t+=`<span class="tag ${p.t}">${TN[p.t]}</span>`+(p.t=="hi"?'<span class="tag rsv">需订位</span>':"");if(p.pr)t+=`<span class="tag">${p.pr}</span>`;return t}
 /* ---------- 挑选 ---------- */
 function chips(arr,cur,fn){return `<div class="chips">${arr.map(([k,v])=>`<button class="chip ${cur==k?"on":""}" onclick="${fn}('${k}')">${v}</button>`).join("")}</div>`}
 function fc(k){F.c=k;if(k!="all"&&k!="dine")F.t="all";renderPick()}function fz(k){F.z=k;renderPick()}function ft(k){F.t=k;renderPick()}
-function renderPick(){let h=`<div class="chips">${DATA.plans.map(p=>`<button class="chip act ${S.plan==p.id?"on":""}" onclick="applyPlan('${p.id}')">套用 ${p.id}</button>`).join("")}<button class="chip" onclick="resetAll()">重置</button></div>`;
+function renderPick(){let h=`<div class="thm">${DATA.plans.map(p=>`<button class="tc ${S.plan==p.id?"on":""}" onclick="applyPlan('${p.id}')"><b>${ptl(p.id)}</b><small>${p.tone||""}</small>${S.plan==p.id?'<i>✓ 当前</i>':""}</button>`).join("")}<button class="tc rs" onclick="resetAll()"><b>↺ 重置</b><small>恢复默认行程</small></button></div>`;
  if(target!=null)h+=`<div class="banner">➕ 正在为 <b>${SLOTS[target]}</b> 挑选，点 ＋ 直接加入<span class="sp"></span><button class="btn sm" onclick="target=null;renderPick()">取消</button></div>`;
  h+=chips([["all","全部"],["dine","🍽️ 正餐"],["walk","🌲 漫步"],["shop","🛍️ 买手店"],["food","☕ 咖啡"]],F.c,"fc")+chips([["all","全部区域"],...[1,2,3,4].map(z=>[String(z),ZN[z]])],F.z,"fz");
  if(F.c=="all"||F.c=="dine")h+=chips([["all","价位不限"],["hi","💎 高端"],["lo","🍜 平价"]],F.t,"ft");
@@ -775,7 +778,7 @@ function renderPick(){let h=`<div class="chips">${DATA.plans.map(p=>`<button cla
   (c=="dine"?[...a.filter(p=>p.t=="hi"),...a.filter(p=>p.t=="lo")]:a).forEach(p=>{const w=where(p.id),col=c=="dine"?TC[p.t]:ZC[p.z];
    h+=`<div class="pc" style="--c:${col}" onclick="openSheet('${p.id}')"><div class="t">${tagsOf(p)}</div><div class="n">${p.n}</div><div class="d">${p.d}</div>${p.note?`<div class="warn">⚠ ${p.note}</div>`:""}${w>=0?`<button class="inslot" onclick="event.stopPropagation();openPicker('${p.id}')">✓ ${SLOTS[w]}</button>`:`<button class="plus" aria-label="加入" onclick="event.stopPropagation();plus('${p.id}')">＋</button>`}</div>`})});
  if(!L.length)h+='<div class="empty">没有符合条件的地点</div>';
- $("#pickv").innerHTML=h;$("#bar").innerHTML=`已选 ${total()} 项 · 查看行程 →`}
+ $("#pickv").innerHTML=h;{const t=document.querySelector("#pickv .thm"),o=t&&t.querySelector(".tc.on");if(o)requestAnimationFrame(()=>{t.scrollLeft=o.getBoundingClientRect().left-t.getBoundingClientRect().left+t.scrollLeft-2})}$("#bar").innerHTML=`已选 ${total()} 项 · 查看行程 →`}
 function plus(id){if(target!=null)addTo(id,target);else openPicker(id)}
 /* ---------- sheet ---------- */
 let cur=null;
