@@ -704,7 +704,7 @@ main{padding:calc(var(--st) + 60px) 14px calc(var(--tab) + var(--sb) + 20px)}
 #mapv{position:fixed;inset:0;bottom:calc(var(--tab) + var(--sb));z-index:10}#map{position:absolute;inset:0}
 #mapv.off{visibility:hidden;pointer-events:none}
 #mtool{position:absolute;top:calc(var(--st) + 60px);right:10px;z-index:500;display:flex;flex-direction:column;gap:8px}
-#panel{position:absolute;left:0;right:0;bottom:0;z-index:600;background:#fff;border-radius:18px 18px 0 0;box-shadow:0 -4px 20px #0002;height:70%;transform:translateY(calc(100% - 150px));transition:transform .25s}
+#panel{position:absolute;left:0;right:0;bottom:0;z-index:600;background:#f5f4f0;border-radius:18px 18px 0 0;box-shadow:0 -4px 20px #0002;height:82%;transform:translateY(calc(100% - 196px));transition:transform .25s}
 #panel.open{transform:translateY(0)}#panel.drag{transition:none}
 .grip{height:28px;display:flex;align-items:center;justify-content:center;touch-action:none}.grip i{width:40px;height:5px;border-radius:3px;background:#ccc}
 #plist{overflow:auto;height:calc(100% - 28px);padding:0 14px 14px;-webkit-overflow-scrolling:touch}
@@ -717,6 +717,18 @@ main{padding:calc(var(--st) + 60px) 14px calc(var(--tab) + var(--sb) + 20px)}
 #sheet h2{margin:2px 0 4px;font-size:21px}#sheet .ad{background:#f6f5f1;border-radius:10px;padding:10px;font-size:14px;margin:10px 0;user-select:text;-webkit-user-select:text}
 #sheet .acts{display:grid;grid-template-columns:1fr 1fr;gap:8px}#sheet .acts .wide{grid-column:1/-1}
 #sheet .pick{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.tl-h{font-size:14px;font-weight:700;margin:12px 0 6px}.tl-e{font-size:12.5px;color:var(--mut);margin:4px 0 8px}
+.tcard{background:#fff;border-radius:10px;padding:9px 12px;margin-bottom:7px;border-left:4px solid var(--c);box-shadow:0 0 0 1px #eeebe4 inset;cursor:pointer}.tcard.ex{background:#faf9f6;cursor:default}
+.tcard .t{font-size:12px;color:#888;display:flex;align-items:center;gap:6px;flex-wrap:wrap}.tcard .n{font-weight:600;font-size:14px;margin:2px 0}.tcard .d{font-size:12.5px;color:#444;line-height:1.5}
+.tcard a{display:inline-flex;align-items:center;min-height:32px;font-size:12px;color:#0a66c2;text-decoration:none}.tcard .ad2{font-size:11.5px;color:#777;margin-top:3px}
+.tn{width:18px;height:18px;border-radius:9px;color:#fff;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
+.alert{background:#fff4d6;border-left:4px solid #e0a400;padding:9px 11px;font-size:12.5px;border-radius:6px;margin:6px 0 10px;line-height:1.5}
+.approx{color:#a16207;font-size:11px;margin-top:3px}
+.seg.sm{margin-bottom:8px}.seg.sm button{min-height:34px;font-size:13px}
+.pks{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none}.pks::-webkit-scrollbar{display:none}
+.pk{flex:none;display:flex;align-items:center;gap:6px;min-height:40px;padding:0 12px 0 6px;border-radius:20px;border:1px solid var(--line);background:#fff;font-size:13px;white-space:nowrap}.pk .mpin{width:24px;height:24px;font-size:11px}
+#plist{overscroll-behavior:contain;touch-action:pan-y}#panel:not(.open) #plist{overflow:hidden}
+.hlp .mpin{animation:hlp .9s ease 2}@keyframes hlp{50%{transform:scale(1.35)}}
 #toast{position:fixed;left:50%;bottom:calc(var(--tab) + var(--sb) + 20px);transform:translateX(-50%);background:#1d1d1fe6;color:#fff;padding:9px 16px;border-radius:20px;font-size:13.5px;z-index:100;opacity:0;transition:opacity .2s;pointer-events:none}#toast.on{opacity:1}
 </style></head><body>
 <header id="top"></header>
@@ -815,15 +827,29 @@ function drawMap(fit){lay.clearLayers();for(const k in MK)delete MK[k];const use
   const m=L.marker(p.ll,{zIndexOffset:today?1000:0,opacity:today?1:.55,icon:L.divIcon({className:"",html:`<div class="mpin" style="background:${D.c}">${n}</div>`,iconSize:[26,26],iconAnchor:[13,13]})}).on("click",()=>openSheet(id));lay.addLayer(m);if(today){MK[id]=m;fitl.push(p.ll)}line.push(p.ll)}));
   if(line.length>1)lay.addLayer(L.polyline(line,{color:D.c,weight:di==S.day?4:2,opacity:di==S.day?.9:.4,dashArray:di==S.day?null:"6 6"}))});
  if(showAll)DATA.places.forEach(p=>{if(!p.ll||used[p.id])return;const c=p.c=="dine"?(p.t=="hi"?"#9a3412":"#0f766e"):(ZC[p.z]||"#6b21a8");lay.addLayer(L.marker(p.ll,{icon:L.divIcon({className:"",html:`<div class="mdot" style="background:${c}"></div>`,iconSize:[14,14],iconAnchor:[7,7]})}).on("click",()=>openSheet(p.id)))});
- if(fit&&fitl.length)map.fitBounds(fitl,{padding:[40,40],paddingBottomRight:[40,170],maxZoom:16});
- const D=DAYS[S.day];let h=`<div class="row" style="margin:0 0 6px"><b>${D.full} · 今日路线</b><span class="sp"></span><button class="chip" onclick="setDay(S.day-1)">‹</button><button class="chip" onclick="setDay(S.day+1)">›</button></div>`,n=0;
- D.slots.forEach(si=>{h+=`<div class="h2" style="margin:8px 0 2px">${SLOTS[si]}</div>`;if(!S.my[si].length)h+='<div class="empty">（空）</div>';S.my[si].forEach(id=>{const p=PL[id];n++;h+=`<button class="stop" onclick="focusStop('${id}')"><span class="mpin" style="background:${D.c}">${n}</span><span style="flex:1"><b style="font-size:14px">${p.n}</b><br><small style="color:var(--mut)">${ZN[p.z]||""}</small></span>›</button>`})});
- $("#plist").innerHTML=h;$("#allbtn").classList.toggle("on",showAll)}
-function focusStop(id){const p=PL[id];if(p.ll)map.flyTo(p.ll,16);$("#panel").classList.remove("open");setTimeout(()=>openSheet(id),400)}
+ if(fit&&fitl.length)map.fitBounds(fitl,{padding:[40,40],paddingBottomRight:[40,210],maxZoom:16});
+ $("#plist").innerHTML=timeline();$("#allbtn").classList.toggle("on",showAll)}
+
+function slotOfTime(day,t){const h=parseInt(t)||12;return day==1?0:day==2?(h<12?1:h<15?2:3):(h<12?4:5)}
+function timeline(){const di=S.day,D=DAYS[di],dd=di+1;const byId={};DATA.days.forEach(x=>{if(x.day==dd&&x.id)byId[x.id]=x});
+ const extra=DATA.days.filter(x=>x.day==dd&&!x.id);const hotel=DATA.days.find(x=>x.day==0);
+ let n=0,peek="",body="";const ids=[].concat(...D.slots.map(si=>S.my[si]));
+ if(ids.includes("sky"))body+='<div class="alert">⚠️ Shibuya Sky 需提前约 4 周官网抢票。11 月底到 12 月初东京约 16:30 日落，周六已按 15:45 入场排好。</div>';
+ D.slots.forEach(si=>{body+=`<div class="tl-h" style="color:${D.c}">${SLOTS[si]}</div>`;
+  if(!S.my[si].length&&!extra.some(x=>slotOfTime(dd,x.time)==si))body+='<div class="tl-e">（这个半天还没有安排）</div>';
+  S.my[si].forEach(id=>{const p=PL[id],x=byId[id];n++;
+   peek+=`<button class="pk" onclick="focusStop('${id}',1)"><span class="mpin" style="background:${D.c}">${n}</span>${p.n}</button>`;
+   const time=x?x.time:SLOTS[si]+(p.c=="dine"?" · 用餐":"");
+   body+=`<div class="tcard" style="--c:${D.c}" onclick="focusStop('${id}',1)"><div class="t"><span class="tn" style="background:${D.c}">${n}</span>${time}${p.c=="dine"?` · <span style="color:${p.t=="hi"?"#9a3412":"#0f766e"}">${TN[p.t]}${p.pr?" · "+p.pr:""}</span>`:""}</div><div class="n">${x?x.name:p.n}</div><div class="d">${x?x.desc:p.d}</div>${p.note?`<div class="approx">⚠ ${p.note}，以 Google Maps 为准</div>`:""}${p.a?`<div class="ad2">📍 ${p.a}</div>`:""}<a href="${gm(p)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Google Maps ↗</a></div>`});
+  extra.filter(x=>slotOfTime(dd,x.time)==si).forEach(x=>{body+=`<div class="tcard ex" style="--c:${D.c}"><div class="t">${x.time}</div><div class="n">${x.name}</div><div class="d">${x.desc}</div>${x.addr?`<div class="ad2">📍 ${x.addr}</div>`:""}</div>`})});
+ if(hotel){const hp=PL[hotel.id];body+=`<div class="tl-h" style="color:#6b21a8">住宿</div><div class="tcard" style="--c:#6b21a8" onclick="focusStop('${hotel.id}',0)"><div class="t">${hotel.time}</div><div class="n">${hotel.name}</div><div class="d">${hotel.desc}</div>${hp?`<a href="${gm(hp)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Google Maps ↗</a>`:""}</div>`}
+ return `<div class="row ph" style="margin:0 0 6px"><b style="color:${D.c}">${DN2[di]}</b><span class="sp"></span><button class="chip" onclick="setDay(S.day-1)" aria-label="前一天">‹</button><button class="chip" onclick="setDay(S.day+1)" aria-label="后一天">›</button></div><div class="seg sm">${DAYS.map((d,i)=>`<button class="${i==di?"on":""}" onclick="setDay(${i})">${d.n}</button>`).join("")}</div><div class="pks">${peek||'<span class="tl-e">今天还没有安排</span>'}</div>${S.plan?`<div class="tl-e">当前：方案 ${S.plan}（已按你的行程调整显示）</div>`:""}${body}`}
+const DN2=["Day 1 周五 · 美学起点 → 麻布台","Day 2 周六 · 南青山扫荡 → Shibuya Sky","Day 3 周日 · 中目黑慢调 → 返程"];
+function focusStop(id,keep){const p=PL[id];if(p.ll)map.flyTo(p.ll,16);const m=MK[id];if(m){const e=m.getElement();if(e){e.classList.remove("hlp");void e.offsetWidth;e.classList.add("hlp")}}if(keep){$("#panel").classList.remove("open");return}$("#panel").classList.remove("open");setTimeout(()=>openSheet(id),400)}
 function toggleAll(){showAll=!showAll;drawMap(false)}
 (function(){const P=$("#panel"),g=P.querySelector(".grip");let y0=null,base=0,dy=0;
- g.addEventListener("pointerdown",e=>{y0=e.clientY;dy=0;base=P.classList.contains("open")?0:P.offsetHeight-150;P.classList.add("drag");try{g.setPointerCapture(e.pointerId)}catch(_){}});
- g.addEventListener("pointermove",e=>{if(y0==null)return;dy=e.clientY-y0;const y=Math.max(0,Math.min(P.offsetHeight-150,base+dy));P.style.transform=`translateY(${y}px)`});
+ g.addEventListener("pointerdown",e=>{y0=e.clientY;dy=0;base=P.classList.contains("open")?0:P.offsetHeight-196;P.classList.add("drag");try{g.setPointerCapture(e.pointerId)}catch(_){}});
+ g.addEventListener("pointermove",e=>{if(y0==null)return;dy=e.clientY-y0;const y=Math.max(0,Math.min(P.offsetHeight-196,base+dy));P.style.transform=`translateY(${y}px)`});
  const end=()=>{if(y0==null)return;y0=null;P.classList.remove("drag");P.style.transform="";if(Math.abs(dy)<6)P.classList.toggle("open");else P.classList.toggle("open",dy<0)};
  g.addEventListener("pointerup",end);g.addEventListener("pointercancel",end)})();
 function renderAll(){renderTrip();renderEat();renderShop();topbar();if(S.tab=="map")drawMap(false)}
