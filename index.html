@@ -672,7 +672,7 @@ html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:15px/1
 button{font:inherit;color:inherit;cursor:pointer}
 #top{position:fixed;top:0;left:0;right:0;z-index:40;height:var(--topH);padding:var(--st) 16px 0;background:rgba(245,244,240,.94);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
 #top b{font-size:16px}#top small{color:var(--mut);font-size:12px}
-#pickv{padding:calc(var(--topH) + 10px) 14px calc(var(--tab) + var(--sb) + 76px)}
+#pickv{padding:calc(var(--topH) + 10px) 14px calc(var(--tab) + var(--sb) + 16px)}
 #tabs{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;background:rgba(255,255,255,.97);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-top:1px solid var(--line);padding-bottom:var(--sb)}
 #tabs button{flex:1;height:var(--tab);border:0;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:11.5px;color:var(--mut);gap:1px}
 #tabs button i{font-style:normal;font-size:21px;line-height:1}#tabs button.on{color:var(--ink);font-weight:600}
@@ -694,7 +694,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .note{font-size:12px;color:var(--mut);margin:0 0 8px}
 .h2{font-size:13px;font-weight:700;color:var(--mut);margin:12px 2px 8px}
 .empty{color:var(--mut);font-size:13px;padding:8px 2px}
-#bar{position:fixed;left:12px;right:12px;bottom:calc(var(--tab) + var(--sb) + 10px);z-index:45;min-height:52px;border-radius:16px;border:0;background:var(--ink);color:#fff;font-size:15px;font-weight:600;box-shadow:0 6px 20px #0003;display:flex;align-items:center;justify-content:center;gap:8px}
+#tabs button{position:relative}#tabs .bdg{position:absolute;top:5px;left:calc(50% + 6px);min-width:17px;height:17px;padding:0 5px;border-radius:9px;background:#e5484d;color:#fff;font-size:10.5px;font-weight:700;line-height:17px;text-align:center;box-shadow:0 0 0 2px #fff;box-sizing:border-box}#tabs .bdg.hide{display:none}#tabs .bdg.bump{animation:bdgb .35s ease}@keyframes bdgb{0%{transform:scale(1)}40%{transform:scale(1.35)}100%{transform:scale(1)}}
 #planv{position:fixed;left:0;right:0;top:var(--topH);bottom:calc(var(--tab) + var(--sb));display:flex;flex-direction:column}
 #mapbox{position:relative;flex:none;height:45%;min-height:80px}#map{position:absolute;inset:0}
 #div{flex:none;height:26px;display:flex;align-items:center;justify-content:center;background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line);touch-action:none;cursor:ns-resize;user-select:none;-webkit-user-select:none}#div i{width:44px;height:5px;border-radius:3px;background:#bbb}
@@ -733,9 +733,9 @@ body.sheet-lock{position:fixed;left:0;right:0;width:100%;overflow:hidden}body.sh
 .tc{flex:none;width:72%;max-width:280px;min-height:64px;scroll-snap-align:start;text-align:left;border:1px solid #f5c9a8;background:#fff8f2;border-radius:14px;padding:9px 12px;display:flex;flex-direction:column;gap:2px;position:relative}.tc b{font-size:15px;color:#9a3412}.tc small{font-size:12px;color:var(--mut);line-height:1.35}.tc i{position:absolute;right:10px;top:9px;font-style:normal;font-size:11px;color:#fff;background:#9a3412;border-radius:8px;padding:0 6px}.tc.on{border-color:#9a3412;box-shadow:0 0 0 1.5px #9a3412 inset}.tc.on b{padding-right:52px}.tc.rs{width:auto;min-width:110px;border-color:var(--line);background:#fff}.tc.rs b{color:var(--ink)}
 </style></head><body>
 <header id="top"></header>
-<section id="pickv"></section><button id="bar" onclick="setTab('plan')"></button>
+<section id="pickv"></section>
 <section id="planv" class="hide"><div id="mapbox"><div id="map"></div></div><div id="div" aria-label="拖动调整地图/行程比例"><i></i></div><div id="tt"></div></section>
-<nav id="tabs"><button data-t="pick" onclick="setTab('pick')"><i>🧺</i>挑选</button><button data-t="plan" onclick="setTab('plan')"><i>🗓️</i>行程</button></nav>
+<nav id="tabs"><button data-t="pick" onclick="setTab('pick')"><i>🧺</i>挑选</button><button data-t="plan" onclick="setTab('plan')"><i>🗓️</i>行程<span class="bdg hide" id="pbdg"></span></button></nav>
 <div id="mask" onclick="closeSheet()"></div><div id="sheet"></div><div id="toast"></div>
 <script>/* @preserve
  * Leaflet 1.9.4, a JS library for interactive maps. https://leafletjs.com
@@ -773,7 +773,7 @@ function rm(si,j){S.my[si].splice(j,1);save();toast("已移除");renderAll()}
 function mv(si,j,d){const a=S.my[si],k=j+d;if(k<0||k>=a.length)return;[a[j],a[k]]=[a[k],a[j]];save();renderAll()}
 function applyPlan(pid){const P=DATA.plans.find(p=>p.id==pid);if(!P)return;const m=SLOTS.map(()=>[]);P.slots.forEach(s=>{const i=SLOTS.indexOf(s.slot);if(i>=0)m[i]=s.ids.filter(id=>PL[id])});S.my=m;S.plan=pid;thCol=true;S.thCol=true;save();toast("已套用 "+ptl(pid));renderAll()}
 function resetAll(){S.my=defaultMy();S.plan="";thCol=true;S.thCol=true;save();toast("已重置为默认行程");renderAll()}
-function setTab(t){S.tab=t;save();$("#pickv").classList.toggle("hide",t!="pick");$("#bar").classList.toggle("hide",t!="pick");$("#planv").classList.toggle("hide",t!="plan");document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.t==t));topbar();if(t=="plan")setTimeout(()=>{map.invalidateSize();drawMap(true)},30);window.scrollTo(0,0)}
+function setTab(t){S.tab=t;save();$("#pickv").classList.toggle("hide",t!="pick");$("#planv").classList.toggle("hide",t!="plan");document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.t==t));topbar();if(t=="plan")setTimeout(()=>{map.invalidateSize();drawMap(true)},30);window.scrollTo(0,0)}
 function setDay(d){S.day=(d+3)%3;save();topbar();renderPlan(true)}
 function topbar(){$("#top").innerHTML=S.tab=="pick"?`<b>挑选</b><small>${S.plan?ptl(S.plan)+" · ":""}已选 ${total()} 项</small>`:`<b>${DAYS[S.day].full.split(" · ")[0]}</b><small>${DAYS[S.day].full.split(" · ")[1]}</small>`}
 function rsvHTML(id){const r=RSV[id];if(!r)return"";return`<div class="rsvbox"><b>预约</b> <span class="tag rsv ${r.k}">${r.s}</span>${r.l.length||r.tel?`<div class="rl">${r.l.map(x=>`<a href="${x[1]}" target="_blank" rel="noopener">${x[0]}</a>`).join("")}${r.tel?`<a href="tel:${r.tel.replace(/-/g,"")}">📞 ${r.tel}</a>`:""}</div>`:""}${r.o?`<div>🗓 ${r.o}</div>`:""}${r.nt?`<div>${r.nt}</div>`:""}</div>`}
@@ -790,7 +790,8 @@ function renderPick(){let h=`<div class="ths ${thCol?"col":""}"><button class="t
   (c=="dine"?[...a.filter(p=>p.t=="hi"),...a.filter(p=>p.t=="lo")]:a).forEach(p=>{const w=where(p.id),col=c=="dine"?TC[p.t]:ZC[p.z];
    h+=`<div class="pc" style="--c:${col}" onclick="openSheet('${p.id}')"><div class="t">${tagsOf(p)}</div><div class="n">${p.n}</div><div class="d">${p.d}</div>${p.note?`<div class="warn">⚠ ${p.note}</div>`:""}${w>=0?`<button class="inslot" onclick="event.stopPropagation();openPicker('${p.id}')">✓ ${SLOTS[w]}</button>`:`<button class="plus" aria-label="加入" onclick="event.stopPropagation();plus('${p.id}')">＋</button>`}</div>`})});
  if(!L.length)h+='<div class="empty">没有符合条件的地点</div>';
- $("#pickv").innerHTML=h;$("#bar").innerHTML=`已选 ${total()} 项 · 查看行程 →`}
+ $("#pickv").innerHTML=h;badge()}
+function badge(){const e=$("#pbdg");if(!e)return;const n=total(),o=e.textContent;e.textContent=n>99?"99+":n;e.classList.toggle("hide",!n);if(o!==""&&o!=e.textContent&&n){e.classList.remove("bump");void e.offsetWidth;e.classList.add("bump")}}
 function plus(id){if(target!=null)addTo(id,target);else openPicker(id)}
 /* ---------- sheet ---------- */
 let cur=null;
