@@ -713,7 +713,8 @@ button{font:inherit;color:inherit;cursor:pointer}
 .mpin{width:26px;height:26px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 4px #0006;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
 .hlp .mpin{animation:hlp .9s ease 2}@keyframes hlp{50%{transform:scale(1.35)}}
 #mask{position:fixed;inset:0;background:#0006;z-index:80;opacity:0;pointer-events:none;transition:opacity .2s}#mask.on{opacity:1;pointer-events:auto}
-#sheet{position:fixed;left:0;right:0;bottom:0;z-index:90;background:#fff;border-radius:20px 20px 0 0;padding:0 18px calc(18px + var(--sb));transform:translateY(105%);transition:transform .25s;max-height:85vh;overflow:auto;overscroll-behavior:contain}
+#sheet{position:fixed;left:0;right:0;bottom:0;z-index:90;background:#fff;border-radius:20px 20px 0 0;padding:0 18px calc(18px + var(--sb));transform:translateY(105%);transition:transform .25s;max-height:85vh;max-height:85dvh;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y}
+body.sheet-lock{position:fixed;left:0;right:0;width:100%;overflow:hidden}body.sheet-lock #tt{overflow:hidden}#mask{touch-action:none}
 #sheet.on{transform:translateY(0)}#sheet.drag{transition:none}
 .grip{height:28px;display:flex;align-items:center;justify-content:center;touch-action:none}.grip i{width:40px;height:5px;border-radius:3px;background:#ccc}
 #sheet h2{margin:2px 0 4px;font-size:21px}#sheet h3{margin:4px 0 10px;font-size:17px}#sheet .ad{background:#f6f5f1;border-radius:10px;padding:10px;font-size:14px;margin:10px 0;user-select:text;-webkit-user-select:text}
@@ -794,15 +795,20 @@ function plus(id){if(target!=null)addTo(id,target);else openPicker(id)}
 /* ---------- sheet ---------- */
 let cur=null;
 function pickerHTML(id){const w=where(id);return `<div class="pick">${SLOTS.map((s,i)=>`<button class="chip ${i==w?"on":""}" onclick="addTo('${id}',${i});closeSheet()">${s}</button>`).join("")}</div>${w>=0?`<button class="btn" style="width:100%;margin-top:8px;color:#b91c1c" onclick="unassign('${id}');closeSheet()">移出行程</button>`:""}`}
-function showSheet(html){$("#sheet").innerHTML='<div class="grip" id="sgrip"><i></i></div>'+html;$("#mask").classList.add("on");$("#sheet").classList.add("on");$("#sheet").scrollTop=0;sheetDrag()}
+function showSheet(html){$("#sheet").innerHTML='<div class="grip" id="sgrip"><i></i></div>'+html;$("#mask").classList.add("on");$("#sheet").classList.add("on");$("#sheet").scrollTop=0;lockBg();sheetDrag()}
 function openPicker(id){cur=id;const p=PL[id];showSheet(`<h3>${p.n}</h3><div class="note">${where(id)>=0?"已在 "+SLOTS[where(id)]+"，改到：":"加入到哪个半天？"}</div>${pickerHTML(id)}`)}
 function openSheet(id){const p=PL[id];cur=id;const w=where(id);
  showSheet(`<h2>${p.n}</h2><div style="display:flex;gap:6px;flex-wrap:wrap">${tagsOf(p)}</div><p style="margin:10px 0 0;font-size:14.5px">${p.d}</p>${p.note?`<div class="warn">⚠ ${p.note}</div>`:""}${rsvHTML(p.id)}<div class="ad">${p.a?"📍 "+p.a:"📍 暂无日文地址（大面积地点，导航按名称搜索）"}</div>
  <div class="acts"><a class="btn pri" href="${gm(p)}" target="_blank" rel="noopener">🧭 Google 导航</a><button class="btn" onclick="copyAddr()" ${p.a?"":"disabled"}>📋 复制日文地址</button></div>
  <div class="note" style="margin-top:12px">${w>=0?"已在 "+SLOTS[w]+"，可改到：":"加入行程："}</div>${pickerHTML(id)}`)}
-function closeSheet(){$("#mask").classList.remove("on");const s=$("#sheet");s.classList.remove("on");s.style.transform=""}
+function closeSheet(){$("#mask").classList.remove("on");const s=$("#sheet");s.classList.remove("on");s.style.transform="";unlockBg()}
+let BGL=null;
+function lockBg(){if(BGL)return;const tt=$("#tt"),b=document.body;BGL={y:window.scrollY||document.documentElement.scrollTop||0,t:tt?tt.scrollTop:0};b.style.top=(-BGL.y)+"px";b.classList.add("sheet-lock");if(tt)tt.scrollTop=BGL.t}
+function unlockBg(){if(!BGL)return;const g=BGL,tt=$("#tt"),b=document.body;BGL=null;b.classList.remove("sheet-lock");b.style.top="";window.scrollTo(0,g.y);if(tt)tt.scrollTop=g.t}
+document.addEventListener("touchmove",e=>{if(!BGL)return;const s=$("#sheet");if(!s.contains(e.target)){e.preventDefault();return}if(s.classList.contains("drag"))e.preventDefault()},{passive:false});
+document.addEventListener("touchstart",e=>{if(!BGL)return;const s=$("#sheet");if(s.contains(e.target)){if(s.scrollTop<=0)s.scrollTop=0;else if(s.scrollTop+s.clientHeight>=s.scrollHeight)s.scrollTop=s.scrollHeight-s.clientHeight-1}},{passive:true});
 function sheetDrag(){const s=$("#sheet");let y0=null,dy=0;s.ontouchstart=e=>{if(s.scrollTop>0&&!e.target.closest("#sgrip"))return;y0=e.touches[0].clientY;dy=0;s.classList.add("drag")};
- s.ontouchmove=e=>{if(y0==null)return;dy=Math.max(0,e.touches[0].clientY-y0);s.style.transform=`translateY(${dy}px)`};
+ s.ontouchmove=e=>{if(y0==null)return;const d=e.touches[0].clientY-y0;if(d<0&&dy==0&&!e.target.closest("#sgrip")){y0=null;s.classList.remove("drag");return}dy=Math.max(0,d);e.preventDefault();s.style.transform=`translateY(${dy}px)`};
  s.ontouchend=()=>{if(y0==null)return;y0=null;s.classList.remove("drag");if(dy>90)closeSheet();else s.style.transform=""}}
 function copyAddr(){const t=PL[cur].a;const ok=()=>toast("已复制日文地址"),fb=()=>{const ta=document.createElement("textarea");ta.value=t;ta.setAttribute("readonly","");ta.style.cssText="position:fixed;top:0;left:0;opacity:0";document.body.appendChild(ta);ta.select();ta.setSelectionRange(0,t.length);let r=false;try{r=document.execCommand("copy")}catch(e){}document.body.removeChild(ta);r?ok():toast("复制失败，请长按地址手动复制")};
  try{if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(t).then(ok,fb);else fb()}catch(e){fb()}}
