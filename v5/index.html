@@ -667,6 +667,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
 		}
 	}
 .phs{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;margin:4px -18px 10px;padding:0 18px;-webkit-overflow-scrolling:touch}.phs figure{flex:0 0 86%;margin:0;scroll-snap-align:center}.phs figure{position:relative}.phs .demo{position:absolute;top:8px;left:8px;z-index:1;background:rgba(0,0,0,.62);color:#fff;font-size:11px;line-height:1.5;padding:1px 8px;border-radius:999px;pointer-events:none}.phs figure:only-child{flex-basis:100%}.phs img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:12px;background:#eee;display:block}.phs figcaption{font-size:10px;color:#999;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.phs figcaption a{color:inherit;text-decoration:none}.pc .pth{float:right;width:60px;height:60px;object-fit:cover;border-radius:10px;margin:2px 0 4px 8px;background:#eee}
+.leg{display:flex;align-items:center;gap:6px;margin:2px 0 2px 14px;padding:4px 8px;border-left:2px dashed #cbd5e1;font-size:12px;color:#475569;line-height:1.35}
+.leg a.lm{flex:1;color:inherit;text-decoration:none;min-width:0}.leg a.lm b{color:#0f172a;font-weight:600}.leg a.lm i{font-style:normal;color:#94a3b8}
+.leg a.ub{flex:none;font-size:11px;padding:3px 7px;border-radius:12px;background:#111;color:#fff;text-decoration:none}
+.lcard{background:#f8fafc;border-radius:10px;padding:8px 11px;margin:4px 0;font-size:12.5px;color:#334155;box-shadow:0 0 0 1px #e2e8f0 inset}.lcard b{color:#0f172a}.lcard a{color:#1d4ed8}
+.lcard ul{margin:4px 0 0;padding-left:18px}.lcard li{margin:2px 0}
 </style><style>:root{--bg:#f5f4f0;--card:#fff;--ink:#1d1d1f;--mut:#86868b;--line:#e8e6e0;--sb:env(safe-area-inset-bottom,0px);--st:env(safe-area-inset-top,0px);--tab:56px;--topH:calc(var(--st) + 48px)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;overscroll-behavior-y:none}
@@ -821,9 +826,47 @@ L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png",{maxZoom
 const lay=L.layerGroup().addTo(map);const MK={};
 function drawMap(fit){lay.clearLayers();for(const k in MK)delete MK[k];const D=DAYS[S.day],line=[];let n=0;
  D.slots.forEach(si=>S.my[si].forEach(id=>{const p=PL[id];n++;if(!p.ll)return;const m=L.marker(p.ll,{icon:L.divIcon({className:"",html:`<div class="mpin" style="background:${D.c}">${n}</div>`,iconSize:[26,26],iconAnchor:[13,13]})}).on("click",()=>openSheet(id));lay.addLayer(m);MK[id]=m;line.push(p.ll)}));
- if(line.length>1)lay.addLayer(L.polyline(line,{color:D.c,weight:4,opacity:.85}));
+ if(line.length>1)lay.addLayer(L.polyline(line,{color:D.c,weight:3,opacity:.7,dashArray:"6 8",interactive:false}));
  if(fit){if(line.length)map.fitBounds(line,{padding:[30,30],maxZoom:16});}}
 function focusStop(id){const p=PL[id];if(!p||!p.ll)return;map.flyTo(p.ll,16);const m=MK[id];if(m){const e=m.getElement();if(e){e.classList.remove("hlp");void e.offsetWidth;e.classList.add("hlp")}}}
+/* ---------- 行程: transport legs ---------- */
+const HOTEL_ID="hotel";
+/* 已核实的公共交通（仅主题方案路段）；票价=IC 卡成人运价。来源：东京Metro官网运价表（1–6km IC ¥178、7–11km IC ¥209）、JR东日本 2026-03-14 运价改定（IC 起步 ¥155）、驿探(ekitan) 渋谷→清澄白河 */
+const TR={
+ "comoli>d47":{l:"东京Metro 银座线",f:"表参道",t:"渋谷",s:1,m:2,y:178,w:"两端各步行约 5–8 分钟；步行全程约 18 分钟也可"},
+ "azashop>node":{l:"东京Metro 日比谷线",f:"神谷町",t:"虎ノ門ヒルズ",s:1,m:2,y:178,w:"步行全程约 15 分钟更方便"},
+ "biotop>teamlab":{l:"东京Metro 南北线",f:"白金台",t:"六本木一丁目",s:3,m:6,y:178,w:"出站步行约 5–8 分钟到麻布台之丘"},
+ "nezu>2121":{l:"东京Metro 千代田线",f:"表参道",t:"乃木坂",s:1,m:2,y:178,w:"根津→表参道站步行约 8 分钟；乃木坂站步行约 5 分钟"},
+ "hotel>kiyosumi":{l:"东京Metro 半藏门线（直通）",f:"渋谷",t:"清澄白河",s:10,m:24,y:209,w:"清澄白河站步行约 3–5 分钟"},
+ "hotel>bb":{l:"东京Metro 银座线/半藏门线",f:"渋谷",t:"表参道",s:1,m:2,y:178,w:"表参道站 B1 出口步行约 5 分钟"},
+ "hotel>meiji":{l:"JR 山手线",f:"渋谷",t:"原宿",s:1,m:2,y:155,w:"原宿站即明治神宫入口"}
+};
+const _R=x=>x*Math.PI/180;
+function dist(a,b){const dl=_R(b[0]-a[0]),dn=_R(b[1]-a[1]);const h=Math.sin(dl/2)**2+Math.cos(_R(a[0]))*Math.cos(_R(b[0]))*Math.sin(dn/2)**2;return 2*6371000*Math.asin(Math.sqrt(h))}
+/* 东京23区 2026-04-20 起运价：起步 1.0km ¥500，之后每 232m 加 ¥100；22:00–5:00 加 2 成 */
+function taxi(m){const r=m*1.3/1000;const y=r<=1?500:500+Math.ceil((r-1)/.232)*100;return{y,min:Math.max(3,Math.round(r/20*60)),km:r}}
+const walkMin=m=>Math.max(1,Math.round(m*1.25/80));
+const gdir=(a,b,mode)=>`https://www.google.com/maps/dir/?api=1&origin=${a[0]},${a[1]}&destination=${b[0]},${b[1]}&travelmode=${mode}`;
+const uber=p=>`https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[latitude]=${p.ll[0]}&dropoff[longitude]=${p.ll[1]}&dropoff[nickname]=${encodeURIComponent(p.q||p.n)}`;
+function legInfo(fid,tid){const A=PL[fid],B=PL[tid];if(!A||!B||!A.ll||!B.ll)return null;const d=dist(A.ll,B.ll),fixed=!!S.plan,tr=fixed?TR[fid+">"+tid]:null;
+ const walk=!tr&&(d<=800||(fixed&&d<=1000));return{A,B,d,tr,walk,tx:taxi(d)}}
+function legHTML(fid,tid){const L=legInfo(fid,tid);if(!L)return"";const{A,B,d,tr,walk,tx}=L;
+ if(walk)return`<div class="leg"><a class="lm" href="${gdir(A.ll,B.ll,"walking")}" target="_blank" rel="noopener">🚶 步行约 <b>${walkMin(d)} 分钟</b> <i>· ${Math.round(d*1.25)}m ↗</i></a></div>`;
+ let t=tr?`🚇 <b>${tr.l}</b> ${tr.f}→${tr.t} · ${tr.s} 站 · 约 ${tr.m} 分钟 · IC ¥${tr.y}<br><i>${tr.w}</i><br>`:`🚇 <b>乘车</b> <i>（线路以 Google 导航为准）</i>${d<=1500?` · 或步行约 ${walkMin(d)} 分钟`:""}<br>`;
+ if(tx.km>1||!tr)t+=`🚕 打车约 ${tx.min} 分钟 · 约 ¥${tx.y.toLocaleString()}`;
+ return`<div class="leg"><a class="lm" href="${gdir(A.ll,B.ll,"transit")}" target="_blank" rel="noopener">${t} <i>↗</i></a><a class="ub" href="${uber(B)}" target="_blank" rel="noopener">Uber</a></div>`}
+function startCard(fid){const H=PL[HOTEL_ID],P=PL[fid];if(!H||!P||!H.ll||!P.ll||fid==HOTEL_ID)return"";const L=legInfo(HOTEL_ID,fid);if(!L)return"";const{d,tr,walk,tx}=L;
+ let t=walk?`🚶 步行约 ${walkMin(d)} 分钟`:(tr?`🚇 ${tr.l} ${tr.f}→${tr.t} · ${tr.s} 站 · 约 ${tr.m} 分钟 · IC ¥${tr.y}（${tr.w}）<br>`:`🚇 乘车（线路以 Google 导航为准）<br>`)+`🚕 打车约 ${tx.min} 分钟 · 约 ¥${tx.y.toLocaleString()}`;
+ return`<div class="lcard">🏨 <b>从酒店出发</b> → ${P.n} <span style="color:#94a3b8">· 直线 ${(d/1000).toFixed(1)}km</span><br>${t}<br><a href="${gdir(H.ll,P.ll,walk?"walking":"transit")}" target="_blank" rel="noopener">Google 导航 ↗</a>${walk?"":` · <a href="${uber(P)}" target="_blank" rel="noopener">Uber 叫车 ↗</a>`}</div>`}
+const AIRPORT=`<div class="lcard">✈️ <b>去机场</b>（机场未定，以下为从涩谷出发的约值，出发前请用 Google 导航复核）<ul>
+<li><b>成田</b> · JR 成田特快 N'EX：涩谷直达约 80–90 分钟，约 ¥3,330（乘车券 ¥1,600＋普通车指定席 ¥1,730，2026-03 改定后）</li>
+<li><b>成田</b> · 京成 Skyliner：先到日暮里（山手线约 30 分钟），日暮里→成田机场最快约 36–41 分钟，¥2,567（IC 运价 ¥1,267＋Liner 券 ¥1,300）</li>
+<li><b>成田</b> · 机场利木津巴士：涩谷 Mark City 等站上车，约 90–120 分钟（视路况），约 ¥3,600（以官网为准）</li>
+<li><b>羽田</b> · 利木津巴士：涩谷 Mark City 直达约 45–80 分钟，¥1,300</li>
+<li><b>羽田</b> · 京急线：品川→羽田最快约 11–15 分钟，IC ¥327（涩谷→品川 JR 山手线约 12 分钟另计）</li>
+<li><b>羽田</b> · 东京单轨：浜松町→羽田约 13–18 分钟，IC ¥519（涩谷→浜松町 JR 约 20 分钟另计）</li>
+</ul><div style="margin-top:4px;color:#64748b">建议国际航班提前 2.5–3 小时到达；周末/傍晚巴士易堵车。</div></div>`;
+const TAXI_NOTE=`<div class="lcard" style="font-size:11.5px;color:#64748b">🚕 打车：日本常用 <b>GO</b>（日本出租车 app，可绑外卡）或 Uber（在东京叫的也是正规出租车）。车费按东京23区 2026-04-20 起运价估算（起步 1km ¥500，每 232m +¥100；22:00–5:00 加 2 成；app 叫车另有迎车费），路程≈直线×1.3、车速约 20km/h，均为<b>约值</b>。🚇 票价为 IC 卡（Suica/PASMO）成人价。点任意交通行可打开 Google 导航。</div>`;
 /* ---------- 行程: timetable ---------- */
 function goPick(si){target=si;const z=slotZone(si)||0;F.c="all";F.t="all";F.z=z?String(z):"all";
  if(!z){const others=DAYS[SDAY[si]].slots.map(slotZone).filter(Boolean);if(others.length)F.z=String(others[0])}setTab("pick");renderPick()}
@@ -831,12 +874,13 @@ function renderPlan(fit){const di=S.day,D=DAYS[di],dd=di+1;const byId={},PP=curP
  const extra=DATA.days.filter(x=>x.day==dd&&!x.id);const hotel=DATA.days.find(x=>x.day==0);const ids=[].concat(...D.slots.map(si=>S.my[si]));
  let h=`<div id="tthead"><div class="seg">${DAYS.map((d,i)=>`<button class="${i==di?"on":""}" onclick="setDay(${i})">${d.n}</button>`).join("")}</div></div><div class="tl-h" style="color:${D.c};margin-top:4px">${dfull(di)}</div>`;
  if(ids.includes("sky"))h+='<div class="alert">⚠️ Shibuya Sky 需提前约 4 周官网抢票。11 月底到 12 月初东京约 16:30 日落，建议约 15:45 入场看落日转夜景。</div>';
- let n=0;D.slots.forEach(si=>{const z=slotZone(si);h+=`<div class="tl-h" style="color:${D.c}">${SLOTS[si]}<small>${z?ZN[z]:""}</small></div>`;
+ let n=0,prev=null;D.slots.forEach(si=>{const z=slotZone(si);h+=`<div class="tl-h" style="color:${D.c}">${SLOTS[si]}<small>${z?ZN[z]:""}</small></div>`;
   if(!S.my[si].length)h+=`<button class="go" onclick="goPick(${si})">＋ 去挑一个</button>`;
-  S.my[si].forEach((id,j)=>{const p=PL[id],x=byId[id];n++;const time=x?x.time:(PP&&PP.tm&&PP.tm[id]&&PP.slots.some(s=>s.slot==SLOTS[si]&&s.ids.includes(id))?PP.tm[id]:(p.c=="dine"?"用餐":SLOTS[si]));const pd=x?x.desc:(PP&&PP.dc&&PP.dc[id]?p.d+" · "+PP.dc[id]:p.d);
+  S.my[si].forEach((id,j)=>{const p=PL[id],x=byId[id];n++;h+=n==1?startCard(id):legHTML(prev,id);prev=id;const time=x?x.time:(PP&&PP.tm&&PP.tm[id]&&PP.slots.some(s=>s.slot==SLOTS[si]&&s.ids.includes(id))?PP.tm[id]:(p.c=="dine"?"用餐":SLOTS[si]));const pd=x?x.desc:(PP&&PP.dc&&PP.dc[id]?p.d+" · "+PP.dc[id]:p.d);
    h+=`<div class="it" data-s="${si}" data-j="${j}"><span class="del">删除</span><div class="tcard" style="--c:${D.c}" onclick="focusStop('${id}')"><div class="t"><span class="tn" style="background:${D.c}">${n}</span>${time}${p.c=="dine"?` · <span style="color:${TC[p.t]}">${TN[p.t]}${p.pr?" · "+p.pr:""}</span>`:""}</div><div class="ed"><button class="ib" aria-label="上移" ${j?"":"disabled"} onclick="event.stopPropagation();mv(${si},${j},-1)">▲</button><button class="ib" aria-label="下移" ${j<S.my[si].length-1?"":"disabled"} onclick="event.stopPropagation();mv(${si},${j},1)">▼</button><button class="ib" aria-label="移除" onclick="event.stopPropagation();rm(${si},${j})">✕</button></div><div class="n">${x?x.name:p.n}</div><div class="d">${pd}</div>${p.note?`<div class="approx">⚠ ${p.note}，以 Google Maps 为准</div>`:""}${p.a?`<div class="ad2">📍 ${p.a}</div>`:""}<a href="${gm(p)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Google Maps ↗</a></div></div>`});
   if(S.my[si].length)h+=`<button class="go" style="min-height:38px;font-size:13px" onclick="goPick(${si})">＋ 再加一个</button>`;
   extra.filter(x=>slotOfTime(dd,x.time)==si).forEach(x=>{h+=`<div class="tcard ex" style="--c:${D.c}"><div class="t" style="padding-right:0">${x.time}</div><div class="n">${x.name}</div><div class="d">${x.desc}</div>${x.addr?`<div class="ad2">📍 ${x.addr}</div>`:""}</div>`})});
+ if(di==2)h+=AIRPORT;if(n>1||di==2)h+=TAXI_NOTE;
  if(hotel){const hp=PL[hotel.id];h+=`<div class="tl-h" style="color:#6b21a8">住宿</div><div class="tcard ex" style="--c:#6b21a8;cursor:pointer" onclick="focusStop('${hotel.id}')"><div class="t" style="padding-right:0">${hotel.time}</div><div class="n">${hotel.name}</div><div class="d">${hotel.desc}</div>${hp&&hp.a?`<div class="ad2">📍 ${hp.a}</div>`:""}${hp?`<a href="${gm(hp)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Google Maps ↗</a>`:""}</div>`}
  h+='<div class="note" style="margin-top:10px">左右滑动切换日期 · 左滑卡片删除 · ▲▼ 调整顺序</div>';
  const tt=$("#tt"),st=tt.scrollTop;tt.innerHTML=h;if(!fit)tt.scrollTop=st;else tt.scrollTop=0;bindSwipe();if(S.tab=="plan")drawMap(fit)}
