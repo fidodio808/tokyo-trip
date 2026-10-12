@@ -721,6 +721,12 @@ button{font:inherit;color:inherit;cursor:pointer}
 .pick{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px}.pick .chip{min-height:44px;padding:0 6px}
 #toast{position:fixed;left:50%;bottom:calc(var(--tab) + var(--sb) + 76px);transform:translateX(-50%);background:#1d1d1fe6;color:#fff;padding:9px 16px;border-radius:20px;font-size:13.5px;z-index:100;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap}#toast.on{opacity:1}
 .hide{display:none!important}
+.ths{background:#fff8f2;border:1px solid #f5c9a8;border-radius:14px;margin-bottom:10px;overflow:hidden}
+.thh{width:100%;min-height:46px;border:0;background:none;display:flex;align-items:center;justify-content:space-between;padding:0 14px;font-size:14px;color:#555;text-align:left}.thh b{color:#9a3412}.thh i{font-style:normal;font-size:18px;transition:transform .2s;color:#9a3412}.ths:not(.col) .thh i{transform:rotate(180deg)}
+.thl{display:flex;flex-direction:column;gap:8px;padding:0 10px 10px}
+.thl .tc{width:100%;max-width:none;min-height:56px;text-align:left;border:1px solid #f5c9a8;background:#fff;border-radius:12px;padding:9px 12px;display:flex;flex-direction:column;gap:2px;position:relative}.thl .tc b{font-size:15px;color:#9a3412;padding-right:56px}.thl .tc small{font-size:12px;color:var(--mut)}.thl .tc i{position:absolute;right:10px;top:10px;font-style:normal;font-size:11px;color:#fff;background:#9a3412;border-radius:8px;padding:0 6px}.thl .tc.on{border-color:#9a3412;box-shadow:0 0 0 1.5px #9a3412 inset}.thl .tc.rs{border-color:var(--line)}.thl .tc.rs b{color:var(--ink)}
+#mapbox{transition:height .28s ease}#mapbox.drag{transition:none}#mapbox.mcol::after{content:"轻点展开地图";position:absolute;left:50%;bottom:6px;transform:translateX(-50%);z-index:500;background:#1d1d1fcc;color:#fff;font-size:11.5px;padding:2px 10px;border-radius:10px;pointer-events:none}
+
 #pickv .chips{flex-wrap:wrap;overflow:visible;gap:6px;padding:0 0 8px}#pickv .chip{min-height:36px;padding:0 11px;font-size:13px}
 .thm{display:flex;gap:10px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}.thm::-webkit-scrollbar{display:none}
 .tc{flex:none;width:72%;max-width:280px;min-height:64px;scroll-snap-align:start;text-align:left;border:1px solid #f5c9a8;background:#fff8f2;border-radius:14px;padding:9px 12px;display:flex;flex-direction:column;gap:2px;position:relative}.tc b{font-size:15px;color:#9a3412}.tc small{font-size:12px;color:var(--mut);line-height:1.35}.tc i{position:absolute;right:10px;top:9px;font-style:normal;font-size:11px;color:#fff;background:#9a3412;border-radius:8px;padding:0 6px}.tc.on{border-color:#9a3412;box-shadow:0 0 0 1.5px #9a3412 inset}.tc.on b{padding-right:52px}.tc.rs{width:auto;min-width:110px;border-color:var(--line);background:#fff}.tc.rs b{color:var(--ink)}
@@ -750,7 +756,9 @@ const PE={A:"🛍️",B:"🌊",C:"🌿"};const ptn=pid=>{const P=DATA.plans.find
 function slotOfTime(day,t){const h=parseInt(t)||12;return day==1?0:day==2?(h<12?1:h<15?2:3):(h<12?4:5)}
 function defaultMy(){const m=SLOTS.map(()=>[]);DATA.days.forEach(x=>{if(!x.id||!x.day||!PL[x.id])return;const s=slotOfTime(x.day,x.time);if(!m[s].includes(x.id))m[s].push(x.id)});return m}
 let S={my:defaultMy(),day:0,tab:"pick",plan:"",split:45};
-try{const v=JSON.parse(localStorage.getItem(K)||"null");if(v&&Array.isArray(v.my)&&v.my.length==6){S.my=v.my.map(a=>a.filter(id=>PL[id]));S.day=Math.min(2,Math.max(0,v.day|0));S.tab=v.tab=="plan"?"plan":"pick";S.plan=v.plan||"";if(v.split>=20&&v.split<=80)S.split=v.split}}catch(e){}
+try{const v=JSON.parse(localStorage.getItem(K)||"null");if(v&&Array.isArray(v.my)&&v.my.length==6){S.my=v.my.map(a=>a.filter(id=>PL[id]));S.day=Math.min(2,Math.max(0,v.day|0));S.tab=v.tab=="plan"?"plan":"pick";S.plan=v.plan||"";if(v.split>=20&&v.split<=80)S.split=v.split;S.seen=!!v.seen;S.thCol=v.thCol}}catch(e){}
+let thCol=S.seen?(S.thCol!==false):false;if(!S.seen){S.seen=true;S.thCol=true;save()}
+function toggleTh(){thCol=!thCol;S.thCol=thCol;save();renderPick()}
 function save(){try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}}
 const F={c:"all",z:"all",t:"all"};let target=null;
 function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("on");clearTimeout(toast.h);toast.h=setTimeout(()=>e.classList.remove("on"),1600)}
@@ -761,8 +769,8 @@ function addTo(id,si){const w=where(id);if(w>=0)S.my[w].splice(S.my[w].indexOf(i
 function unassign(id){const w=where(id);if(w<0)return;S.my[w].splice(S.my[w].indexOf(id),1);save();toast("已移出行程");renderAll()}
 function rm(si,j){S.my[si].splice(j,1);save();toast("已移除");renderAll()}
 function mv(si,j,d){const a=S.my[si],k=j+d;if(k<0||k>=a.length)return;[a[j],a[k]]=[a[k],a[j]];save();renderAll()}
-function applyPlan(pid){const P=DATA.plans.find(p=>p.id==pid);if(!P)return;const m=SLOTS.map(()=>[]);P.slots.forEach(s=>{const i=SLOTS.indexOf(s.slot);if(i>=0)m[i]=s.ids.filter(id=>PL[id])});S.my=m;S.plan=pid;save();toast("已套用 "+ptl(pid));renderAll()}
-function resetAll(){S.my=defaultMy();S.plan="";save();toast("已重置为默认行程");renderAll()}
+function applyPlan(pid){const P=DATA.plans.find(p=>p.id==pid);if(!P)return;const m=SLOTS.map(()=>[]);P.slots.forEach(s=>{const i=SLOTS.indexOf(s.slot);if(i>=0)m[i]=s.ids.filter(id=>PL[id])});S.my=m;S.plan=pid;thCol=true;S.thCol=true;save();toast("已套用 "+ptl(pid));renderAll()}
+function resetAll(){S.my=defaultMy();S.plan="";thCol=true;S.thCol=true;save();toast("已重置为默认行程");renderAll()}
 function setTab(t){S.tab=t;save();$("#pickv").classList.toggle("hide",t!="pick");$("#bar").classList.toggle("hide",t!="pick");$("#planv").classList.toggle("hide",t!="plan");document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.t==t));topbar();if(t=="plan")setTimeout(()=>{map.invalidateSize();drawMap(true)},30);window.scrollTo(0,0)}
 function setDay(d){S.day=(d+3)%3;save();topbar();renderPlan(true)}
 function topbar(){$("#top").innerHTML=S.tab=="pick"?`<b>挑选</b><small>${S.plan?ptl(S.plan)+" · ":""}已选 ${total()} 项</small>`:`<b>${DAYS[S.day].full.split(" · ")[0]}</b><small>${DAYS[S.day].full.split(" · ")[1]}</small>`}
@@ -770,7 +778,7 @@ function tagsOf(p){let t=`<span class="tag">${ZN[p.z]||""}</span><span class="ta
 /* ---------- 挑选 ---------- */
 function chips(arr,cur,fn){return `<div class="chips">${arr.map(([k,v])=>`<button class="chip ${cur==k?"on":""}" onclick="${fn}('${k}')">${v}</button>`).join("")}</div>`}
 function fc(k){F.c=k;if(k!="all"&&k!="dine")F.t="all";renderPick()}function fz(k){F.z=k;renderPick()}function ft(k){F.t=k;renderPick()}
-function renderPick(){let h=`<div class="thm">${DATA.plans.map(p=>`<button class="tc ${S.plan==p.id?"on":""}" onclick="applyPlan('${p.id}')"><b>${ptl(p.id)}</b><small>${p.tone||""}</small>${S.plan==p.id?'<i>✓ 当前</i>':""}</button>`).join("")}<button class="tc rs" onclick="resetAll()"><b>↺ 重置</b><small>恢复默认行程</small></button></div>`;
+function renderPick(){let h=`<div class="ths ${thCol?"col":""}"><button class="thh" onclick="toggleTh()" aria-expanded="${!thCol}"><span>主题方案 · <b>${S.plan?ptl(S.plan):"默认"}</b></span><i>⌄</i></button>${thCol?"":`<div class="thl">${DATA.plans.map(p=>`<button class="tc ${S.plan==p.id?"on":""}" onclick="applyPlan('${p.id}')"><b>${ptl(p.id)}</b><small>${p.tone||""}</small>${S.plan==p.id?'<i>✓ 当前</i>':""}</button>`).join("")}<button class="tc rs" onclick="resetAll()"><b>↺ 重置</b><small>恢复默认行程</small></button></div>`}</div>`;
  if(target!=null)h+=`<div class="banner">➕ 正在为 <b>${SLOTS[target]}</b> 挑选，点 ＋ 直接加入<span class="sp"></span><button class="btn sm" onclick="target=null;renderPick()">取消</button></div>`;
  h+=chips([["all","全部"],["dine","🍽️ 正餐"],["walk","🌲 漫步"],["shop","🛍️ 买手店"],["food","☕ 咖啡"]],F.c,"fc")+chips([["all","全部区域"],...[1,2,3,4].map(z=>[String(z),ZN[z]])],F.z,"fz");
  if(F.c=="all"||F.c=="dine")h+=chips([["all","价位不限"],["hi","💎 高端"],["lo","🍜 平价"]],F.t,"ft");
@@ -779,7 +787,7 @@ function renderPick(){let h=`<div class="thm">${DATA.plans.map(p=>`<button class
   (c=="dine"?[...a.filter(p=>p.t=="hi"),...a.filter(p=>p.t=="lo")]:a).forEach(p=>{const w=where(p.id),col=c=="dine"?TC[p.t]:ZC[p.z];
    h+=`<div class="pc" style="--c:${col}" onclick="openSheet('${p.id}')"><div class="t">${tagsOf(p)}</div><div class="n">${p.n}</div><div class="d">${p.d}</div>${p.note?`<div class="warn">⚠ ${p.note}</div>`:""}${w>=0?`<button class="inslot" onclick="event.stopPropagation();openPicker('${p.id}')">✓ ${SLOTS[w]}</button>`:`<button class="plus" aria-label="加入" onclick="event.stopPropagation();plus('${p.id}')">＋</button>`}</div>`})});
  if(!L.length)h+='<div class="empty">没有符合条件的地点</div>';
- $("#pickv").innerHTML=h;{const t=document.querySelector("#pickv .thm"),o=t&&t.querySelector(".tc.on");if(o)requestAnimationFrame(()=>{t.scrollLeft=o.getBoundingClientRect().left-t.getBoundingClientRect().left+t.scrollLeft-2})}$("#bar").innerHTML=`已选 ${total()} 项 · 查看行程 →`}
+ $("#pickv").innerHTML=h;$("#bar").innerHTML=`已选 ${total()} 项 · 查看行程 →`}
 function plus(id){if(target!=null)addTo(id,target);else openPicker(id)}
 /* ---------- sheet ---------- */
 let cur=null;
@@ -827,13 +835,20 @@ function bindSwipe(){document.querySelectorAll("#tt .it").forEach(el=>{const c=e
  c.addEventListener("touchend",()=>{if(!on)return;on=false;c.style.transition="";if(dx<-90){c.style.transform="translateX(-100%)";setTimeout(()=>rm(+el.dataset.s,+el.dataset.j),180)}else c.style.transform=""})})}
 (function(){const tt=$("#tt");let x0=null,y0=0,t0=0;tt.addEventListener("touchstart",e=>{if(e.target.closest(".it"))return x0=null;x0=e.touches[0].clientX;y0=e.touches[0].clientY;t0=Date.now()},{passive:true});
  tt.addEventListener("touchend",e=>{if(x0==null)return;const dx=e.changedTouches[0].clientX-x0,dy=e.changedTouches[0].clientY-y0;if(Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*1.5&&Date.now()-t0<600)setDay(S.day+(dx<0?1:-1))},{passive:true})})();
-/* ---------- divider ---------- */
-(function(){const dv=$("#div"),mb=$("#mapbox"),pv=$("#planv");let drag=false,y0=0,h0=0,raf=0;
- const apply=()=>{mb.style.height=S.split+"%"};apply();
+/* ---------- divider + auto-shrink ---------- */
+(function(){const dv=$("#div"),mb=$("#mapbox"),pv=$("#planv"),tt=$("#tt");let drag=false,y0=0,h0=0,raf=0,col=false,lock=0,anchor=0,sraf=0;const COL=18;
+ const apply=()=>{mb.style.height=(col?COL:S.split)+"%";mb.classList.toggle("mcol",col)};apply();
  const inv=()=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;map.invalidateSize()})};
- const start=y=>{drag=true;y0=y;h0=mb.getBoundingClientRect().height};
+ const hold=()=>{lock=Date.now()+450;setTimeout(()=>{anchor=tt.scrollTop},470)};
+ const collapse=()=>{if(col||drag||S.split<=COL+4)return;const room=tt.scrollHeight-tt.clientHeight;const grow=pv.getBoundingClientRect().height*(S.split-COL)/100;if(room-grow<60)return;col=true;apply();hold()};
+ const expand=()=>{if(!col)return;col=false;apply();hold()};
+ mb.addEventListener("transitionend",e=>{if(e.target===mb&&e.propertyName=="height"){map.invalidateSize();if(!col&&S.tab=="plan")drawMap(false)}});
+ tt.addEventListener("scroll",()=>{if(sraf)return;sraf=requestAnimationFrame(()=>{sraf=0;if(drag)return;const y=tt.scrollTop;if(y<10){anchor=0;expand();return}if(Date.now()<lock)return;if(!col){if(y<anchor)anchor=y;if(y>40&&y-anchor>40)collapse()}})},{passive:true});
+ mb.addEventListener("click",e=>{if(col){e.stopPropagation();e.preventDefault();expand()}},true);
+ window.__planUI={collapsed:()=>col,expand};
+ const start=y=>{if(col){col=false;mb.classList.remove("mcol")}drag=true;mb.classList.add("drag");y0=y;h0=mb.getBoundingClientRect().height};
  const move=y=>{if(!drag)return;const H=pv.getBoundingClientRect().height;S.split=Math.max(20,Math.min(80,(h0+y-y0)/H*100));apply();inv()};
- const end=()=>{if(!drag)return;drag=false;save();setTimeout(()=>map.invalidateSize(),30)};
+ const end=()=>{if(!drag)return;drag=false;mb.classList.remove("drag");save();anchor=tt.scrollTop;setTimeout(()=>map.invalidateSize(),30)};
  if(window.PointerEvent){dv.addEventListener("pointerdown",e=>{e.preventDefault();try{dv.setPointerCapture(e.pointerId)}catch(_){}start(e.clientY)});dv.addEventListener("pointermove",e=>{if(drag){e.preventDefault();move(e.clientY)}});dv.addEventListener("pointerup",end);dv.addEventListener("pointercancel",end)}
  else{dv.addEventListener("touchstart",e=>{e.preventDefault();start(e.touches[0].clientY)},{passive:false});dv.addEventListener("touchmove",e=>{e.preventDefault();move(e.touches[0].clientY)},{passive:false});dv.addEventListener("touchend",end);dv.addEventListener("touchcancel",end)}})();
 addEventListener("resize",()=>map.invalidateSize());
