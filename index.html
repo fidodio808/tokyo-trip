@@ -777,11 +777,11 @@ function topbar(){$("#top").innerHTML=S.tab=="pick"?`<b>挑选</b><small>${S.pla
 function tagsOf(p){let t=`<span class="tag">${ZN[p.z]||""}</span><span class="tag">${CI[p.c]} ${CN[p.c]}</span>`;if(p.c=="dine")t+=`<span class="tag ${p.t}">${TN[p.t]}</span>`+(p.t=="hi"?'<span class="tag rsv">需订位</span>':"");if(p.pr)t+=`<span class="tag">${p.pr}</span>`;return t}
 /* ---------- 挑选 ---------- */
 function chips(arr,cur,fn){return `<div class="chips">${arr.map(([k,v])=>`<button class="chip ${cur==k?"on":""}" onclick="${fn}('${k}')">${v}</button>`).join("")}</div>`}
-function fc(k){F.c=k;if(k!="all"&&k!="dine")F.t="all";renderPick()}function fz(k){F.z=k;renderPick()}function ft(k){F.t=k;renderPick()}
+function fc(k){F.c=k;if(k!="dine")F.t="all";renderPick()}function fz(k){F.z=k;renderPick()}function ft(k){F.t=k;renderPick()}
 function renderPick(){let h=`<div class="ths ${thCol?"col":""}"><button class="thh" onclick="toggleTh()" aria-expanded="${!thCol}"><span>主题方案 · <b>${S.plan?ptl(S.plan):"默认"}</b></span><i>⌄</i></button>${thCol?"":`<div class="thl">${DATA.plans.map(p=>`<button class="tc ${S.plan==p.id?"on":""}" onclick="applyPlan('${p.id}')"><b>${ptl(p.id)}</b><small>${p.tone||""}</small>${S.plan==p.id?'<i>✓ 当前</i>':""}</button>`).join("")}<button class="tc rs" onclick="resetAll()"><b>↺ 重置</b><small>恢复默认行程</small></button></div>`}</div>`;
  if(target!=null)h+=`<div class="banner">➕ 正在为 <b>${SLOTS[target]}</b> 挑选，点 ＋ 直接加入<span class="sp"></span><button class="btn sm" onclick="target=null;renderPick()">取消</button></div>`;
  h+=chips([["all","全部"],["dine","🍽️ 正餐"],["walk","🌲 漫步"],["shop","🛍️ 买手店"],["food","☕ 咖啡"]],F.c,"fc")+chips([["all","全部区域"],...[1,2,3,4].map(z=>[String(z),ZN[z]])],F.z,"fz");
- if(F.c=="all"||F.c=="dine")h+=chips([["all","价位不限"],["hi","💎 高端"],["lo","🍜 平价"]],F.t,"ft");
+ if(F.c=="dine")h+=chips([["all","价位不限"],["hi","💎 高端"],["lo","🍜 平价"]],F.t,"ft");
  const L=DATA.places.filter(p=>["dine","walk","shop","food"].includes(p.c)&&(F.c=="all"||p.c==F.c)&&(F.z=="all"||p.z==F.z)&&(F.t=="all"||p.c!="dine"||p.t==F.t));
  ["dine","walk","shop","food"].forEach(c=>{const a=L.filter(p=>p.c==c);if(!a.length)return;h+=`<div class="h2">${CI[c]} ${CN[c]}（${a.length}）</div>`;
   (c=="dine"?[...a.filter(p=>p.t=="hi"),...a.filter(p=>p.t=="lo")]:a).forEach(p=>{const w=where(p.id),col=c=="dine"?TC[p.t]:ZC[p.z];
