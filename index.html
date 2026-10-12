@@ -687,7 +687,7 @@ header{padding:14px 18px;background:#1d1d1f;color:#f5f4f0}header h1{margin:0;fon
 @media(max-width:800px){header h1{font-size:15px}.wrap{flex-direction:column;height:auto}#map{order:-1;flex:none;width:100%;height:42vh;min-height:260px;position:sticky;top:0;z-index:5}#side{width:100%;overflow:visible}}
 .leaflet-control-layers-toggle{background-image:none!important;display:flex!important;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#333;text-decoration:none}.leaflet-control-layers-toggle::after{content:"图层"}
 #mh{display:none}
-@media(max-width:800px){#mh{display:flex;position:absolute;left:0;right:0;bottom:0;height:24px;z-index:1000;align-items:center;justify-content:center;background:rgba(255,255,255,.85);border-top:1px solid #ddd;touch-action:none;cursor:ns-resize;user-select:none;-webkit-user-select:none}#mh i{width:44px;height:5px;border-radius:3px;background:#999}#mh button{position:absolute;right:6px;top:2px;height:20px;border:1px solid #888;background:#fff;border-radius:10px;font-size:11px;padding:0 8px;touch-action:manipulation}#map.drag{transition:none}#map .leaflet-bottom{bottom:24px}#mh{z-index:1001}}
+@media(max-width:800px){#mh{display:flex;position:absolute;left:0;right:0;bottom:0;height:24px;z-index:1000;align-items:center;justify-content:center;background:rgba(255,255,255,.85);border-top:1px solid #ddd;touch-action:none;cursor:ns-resize;user-select:none;-webkit-user-select:none}#mh i{width:44px;height:5px;border-radius:3px;background:#999}#mh button{position:absolute;right:6px;top:2px;height:20px;border:1px solid #888;background:#fff;border-radius:10px;font-size:11px;padding:0 8px;touch-action:manipulation}html,body{overflow-anchor:none}#map{transition:height .28s ease}#map.drag{transition:none}#map.col #mh button{display:none}.pin.hl{animation:hl 1s ease 2}@keyframes hl{50%{box-shadow:0 0 0 8px #e0a40088}}#map .leaflet-bottom{bottom:24px}#mh{z-index:1001}}
 </style></head><body>
 <header><h1>东京高阶生活方式与潮流 Citywalk</h1><p>3 天 2 晚 · 每日行程 + 三套周五至周日组合方案 + 自选菜单</p></header>
 <div class="wrap"><div id="side"><div class="row modes" id="modes"></div><div id="sub"></div><div id="body"></div></div><div id="map"><div id="mh" title="拖动调整地图高度"><i></i><button id="mhb" type="button">中</button></div></div></div>
@@ -707,12 +707,12 @@ L.DomEvent.disableClickPropagation(h);L.DomEvent.disableScrollPropagation(h);
 var mob=function(){return window.matchMedia("(max-width:800px)").matches};
 var raf=0;function inv(){if(raf)return;raf=requestAnimationFrame(function(){raf=0;map.invalidateSize()})}
 function lab(v){var best=P[0];P.forEach(function(x){if(Math.abs(x[1]-v)<Math.abs(best[1]-v))best=x});b.textContent=best[0]}
-function set(v,save){v=Math.max(MIN,Math.min(MAX,v));if(mob()){el.style.height=v+"vh";el.style.minHeight="0"}lab(v);inv();if(save){try{localStorage.setItem(K,String(Math.round(v)))}catch(e){}}cur=v}
-var cur=42;try{var sv=parseFloat(localStorage.getItem(K));if(sv>=MIN&&sv<=MAX)cur=sv}catch(e){}
-function apply(){if(mob())set(cur,false);else{el.style.height="";el.style.minHeight="";inv()}}
+function set(v,save){v=Math.max(MIN,Math.min(MAX,v));if(mob()&&!col){el.style.height=v+"vh";el.style.minHeight="0"}lab(v);inv();if(save){try{localStorage.setItem(K,String(Math.round(v)))}catch(e){}}cur=v}
+var cur=42,col=false,COL=15,anchor=0,lock=0;function hold(){lock=Date.now()+450;setTimeout(function(){anchor=window.scrollY},460)}try{var sv=parseFloat(localStorage.getItem(K));if(sv>=MIN&&sv<=MAX)cur=sv}catch(e){}
+function apply(){if(mob()){if(col){el.style.height=COL+"vh";el.style.minHeight="0"}else set(cur,false)}else{col=false;el.classList.remove("col");el.style.height="";el.style.minHeight="";inv()}}
 apply();window.addEventListener("resize",apply);
 var drag=false,sy=0,sh=0;
-function start(y){drag=true;sy=y;sh=el.getBoundingClientRect().height;el.classList.add("drag")}
+function start(y){if(col){col=false;el.classList.remove("col")}drag=true;sy=y;sh=el.getBoundingClientRect().height;el.classList.add("drag")}
 function move(y){if(!drag)return;set((sh+y-sy)/window.innerHeight*100,false)}
 function end(){if(!drag)return;drag=false;el.classList.remove("drag");set(cur,true);setTimeout(function(){map.invalidateSize()},50)}
 var onBtn=function(e){return e.target===b};
@@ -724,13 +724,20 @@ h.addEventListener("touchmove",function(e){if(drag){e.preventDefault();move(e.to
 h.addEventListener("touchend",end);h.addEventListener("touchcancel",end);
 h.addEventListener("mousedown",function(e){if(onBtn(e))return;e.preventDefault();start(e.clientY);var mm=function(ev){move(ev.clientY)},mu=function(){end();document.removeEventListener("mousemove",mm);document.removeEventListener("mouseup",mu)};document.addEventListener("mousemove",mm);document.addEventListener("mouseup",mu)})}
 b.addEventListener("click",function(e){e.stopPropagation();var i=0;P.forEach(function(x,j){if(x[0]===b.textContent)i=j});set(P[(i+1)%3][1],true)});
+function collapse(){if(col||drag||!mob())return;col=true;el.classList.add("col");el.style.height=COL+"vh";el.style.minHeight="0";inv();hold()}
+function expand(){if(!col)return;col=false;el.classList.remove("col");set(cur,false);hold()}
+el.addEventListener("transitionend",function(e){if(e.target===el&&e.propertyName==="height")map.invalidateSize()});
+var sraf=0;window.addEventListener("scroll",function(){if(sraf)return;sraf=requestAnimationFrame(function(){sraf=0;if(!mob()||drag)return;var y=window.scrollY;if(Date.now()<lock&&y>=20)return;
+if(y<20){anchor=0;expand()}else if(!col){if(y<anchor)anchor=y;if(y>60&&y-anchor>60)collapse()}})},{passive:true});
+el.addEventListener("click",function(e){if(col&&!drag){e.stopPropagation();e.preventDefault();expand()}},true);
+window.__mapUI={collapsed:function(){return col},expand:expand};
 })();
 
 const layer=L.layerGroup().addTo(map);const mk={};
 function pin(ll,color,label,html,key){const m=L.marker(ll,{icon:L.divIcon({className:"",html:`<div class="pin" style="background:${color}"><span>${label}</span></div>`,iconSize:[26,26],iconAnchor:[13,26],popupAnchor:[0,-24]})}).bindPopup(html);layer.addLayer(m);if(key)mk[key]=m;return m}
 function pop(p,extra){return `<b>${p.n}</b><br><small>${ZN[p.z]||""}${extra?" · "+extra:""}</small><br>${p.d}${p.note?`<br><span class="approx">⚠ ${p.note}</span>`:""}<br><a href="${gm(p)}" target="_blank">Google Maps 打开 / 导航</a>`}
 function fit(lls){if(lls.length)map.fitBounds(lls,{padding:[30,30],maxZoom:16})}
-function fly(k){const m=mk[k];if(!m)return;if(innerWidth<=800)scrollTo({top:0,behavior:"smooth"});map.flyTo(m.getLatLng(),17);m.openPopup()}
+function fly(k){const m=mk[k];if(!m)return;const U=window.__mapUI;if(U&&U.collapsed()){map.flyTo(m.getLatLng(),16);const e=m.getElement&&m.getElement(),pn=e&&e.querySelector(".pin");if(pn){pn.classList.remove("hl");void pn.offsetWidth;pn.classList.add("hl")}return}map.flyTo(m.getLatLng(),17);m.openPopup()}
 let mode="day",dsel="all",psel="A",zsel="all",csel="all";
 function tabs(el,items,cur,fn){document.getElementById(el).innerHTML=items.map(([k,v])=>`<button class="${cur==k?"on":""}" onclick="${fn}('${k}')">${v}</button>`).join("")}
 function setMode(m){mode=m;tabs("modes",[["day","📅 每日行程"],["plan","🧩 组合方案"],["menu","📖 自选菜单"]],mode,"setMode");({day:renderDay,plan:renderPlan,menu:renderMenu})[m]()}
