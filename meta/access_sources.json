@@ -307,17 +307,18 @@
   "nt": "位于东京中城后侧；中城：六本木8号出口直结、乃木坂3号出口约3分"
  },
  "hotel": {
-  "name": "新宿プリンスホテル",
-  "s": "西武新宿",
-  "m": 0,
+  "name": "三井ガーデンホテル五反田",
+  "s": "JR 五反田",
+  "e": "东口",
+  "m": 3,
   "alt": [
-   "JR/地铁 新宿 步行5分",
-   "大江户线 新宿西口 D3出口 步行2分"
+   "都营浅草线 五反田 A3出口 步行3分",
+   "东急池上线 五反田 步行3分"
   ],
   "src": [
-   "https://www.princehotels.co.jp/shinjuku/access/"
+   "https://www.gardenhotels.co.jp/gotanda/access/"
   ],
-  "lvl": "station"
+  "lvl": "exit"
  },
  "hrm": {
   "name": "Hollywood Ranch Market",
