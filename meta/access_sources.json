@@ -307,17 +307,17 @@
   "nt": "位于东京中城后侧；中城：六本木8号出口直结、乃木坂3号出口约3分"
  },
  "hotel": {
-  "name": "sequence MIYASHITA PARK（示例住宿）",
-  "s": "渋谷",
-  "e": "B1",
-  "m": 3,
-  "lvl": "exit",
-  "src": [
-   "https://www.sequencehotels.com/miyashita-park/"
-  ],
+  "name": "新宿プリンスホテル",
+  "s": "西武新宿",
+  "m": 0,
   "alt": [
-   "JR 渋谷 八公口 步行7分"
-  ]
+   "JR/地铁 新宿 步行5分",
+   "大江户线 新宿西口 D3出口 步行2分"
+  ],
+  "src": [
+   "https://www.princehotels.co.jp/shinjuku/access/"
+  ],
+  "lvl": "station"
  },
  "hrm": {
   "name": "Hollywood Ranch Market",
