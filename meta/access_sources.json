@@ -444,8 +444,8 @@
   "m": 4,
   "lvl": "exit",
   "src": [
-   "https://restaurant.ikyu.com/107118/highlights",
-   "https://tabelog.com/en/tokyo/A1303/A130303/13179867/"
+   "https://www.logroad-daikanyama.jp/access.html",
+   "https://www.gotokyo.org/jp/spot/289/index.html"
   ],
   "nt": "正面口=北口"
  },
@@ -1082,5 +1082,31 @@
    "https://www.kanko-shinjuku.jp/"
   ],
   "lvl": "station"
- }
+ },
+ "nep": [
+  "https://harao.tokyo/sites/hro/buildingpage/109153/1",
+  "http://www.omotesando-info.com/shop/fashion/shop/nepenthes-tokyo.html"
+ ],
+ "beams": [
+  "https://www.fashion-press.net/maps/1",
+  "https://map.yahoo.co.jp/v3/place/eTwWwqdzfnk"
+ ],
+ "niceness": [
+  "https://www.fashion-press.net/maps/69919"
+ ],
+ "teahouse": [
+  "https://www.afm-teahouse.com/aoyama"
+ ],
+ "shiba": [
+  "https://www.tokyo-park.or.jp/park/siba/index.html"
+ ],
+ "fuglen": [
+  "https://tabelog.com/tokyo/A1318/A131810/13141002/"
+ ],
+ "gr8": [
+  "https://www.laforet.ne.jp/shop_search/shop66"
+ ],
+ "biotop": [
+  "https://www.biotop.jp/about/"
+ ]
 }

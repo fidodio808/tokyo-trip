@@ -4117,5 +4117,42 @@
    ],
    "nt": "无休；售罄即止"
   }
- }
+ },
+ "teahouse": [
+  "https://www.afm-teahouse.com/aoyama"
+ ],
+ "niceness": [
+  "https://www.niceness.jp/ja/ebisu-store",
+  "https://highvision.jp/news/niceness-ebisu-open/"
+ ],
+ "beams": [
+  "https://www.beams.co.jp/shop/fig/",
+  "https://www.beams.co.jp/blog/fig/175515/"
+ ],
+ "gr8": [
+  "https://sgs109.com/shop/113",
+  "https://gr8.jp/blog/3791?lng=en"
+ ],
+ "soph": [
+  "https://www.soph.net/shop/pages/store_soph_tokyo.aspx",
+  "https://www.50910.jp/shop/detail.php?shop=466"
+ ],
+ "nep": [
+  "https://nepenthes.co.jp/stores/"
+ ],
+ "uobei": [
+  "https://www.club-genki.info/shop/detail/area_id/0145000/shop_id/2239",
+  "https://machi-home.jp/shop/uobei-info-20"
+ ],
+ "shiba": [
+  "https://www.tokyo-park.or.jp/park/siba/index.html"
+ ],
+ "biocaf": [
+  "https://www.biotop.jp/special/menu/KITCHEN_bw_CAFE.pdf"
+ ],
+ "_sunset": [
+  "https://eco.mtk.nao.ac.jp/koyomi/dni/2026/s1311.html",
+  "https://eco.mtk.nao.ac.jp/koyomi/dni/2026/s1312.html",
+  "https://eco.mtk.nao.ac.jp/koyomi/dni/2027/s1301.html"
+ ]
 }
