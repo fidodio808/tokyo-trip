@@ -1476,6 +1476,71 @@
    "n": "新宿黄金街（ゴールデン街）",
    "z": 7,
    "excluded": "酒吧街区（各店不同）"
+  },
+  "jotocurry": {
+   "n": "上等カレー 渋谷本店",
+   "z": 2,
+   "c": "dine",
+   "jan1": "休",
+   "jan2": "未知",
+   "jan3": "未知",
+   "basis": "推断",
+   "sources": [
+    "https://www.tokumasa.net/jyoutoucurry_tokyo01"
+   ],
+   "note": "官方写「年末年始休」，具体日期未公布；1/1 推断休，1/2–3 待确认"
+  },
+  "menchirashi": {
+   "n": "麺散（原宿）",
+   "z": 1,
+   "c": "dine",
+   "jan1": "未知",
+   "jan2": "未知",
+   "jan3": "未知",
+   "basis": "待确认",
+   "sources": [
+    "https://tabelog.com/tokyo/A1306/A130601/13225567/"
+   ],
+   "note": "未找到年末年始安排"
+  },
+  "levain": {
+   "n": "ルヴァン 富ヶ谷店（Levain）",
+   "z": 2,
+   "c": "food",
+   "jan1": "未知",
+   "jan2": "未知",
+   "jan3": "未知",
+   "basis": "待确认",
+   "sources": [
+    "https://tabelog.com/tokyo/A1318/A131810/13001841/"
+   ],
+   "note": "未找到年末年始安排"
+  },
+  "abura": {
+   "n": "東京油組総本店 渋谷組",
+   "z": 2,
+   "c": "dine",
+   "jan1": "未知",
+   "jan2": "未知",
+   "jan3": "未知",
+   "basis": "待确认",
+   "sources": [
+    "https://tabelog.com/tokyo/A1303/A130301/13051249/"
+   ],
+   "note": "未找到年末年始安排（食べログ写全年无休，但未单独说明元旦）"
+  },
+  "kushitaro": {
+   "n": "串タロー 本店（新宿）",
+   "z": 7,
+   "c": "dine",
+   "jan1": "未知",
+   "jan2": "未知",
+   "jan3": "未知",
+   "basis": "待确认",
+   "sources": [
+    "https://tabelog.com/tokyo/A1304/A130401/13033198/"
+   ],
+   "note": "未找到年末年始安排"
   }
  }
 }
