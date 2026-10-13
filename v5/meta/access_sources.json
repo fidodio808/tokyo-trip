@@ -1108,5 +1108,74 @@
  ],
  "biotop": [
   "https://www.biotop.jp/about/"
- ]
+ ],
+ "jotocurry": {
+  "name": "上等カレー 渋谷本店",
+  "s": "JR 渋谷",
+  "e": "新南口",
+  "m": 3,
+  "alt": [
+   "JR 渋谷 南口 步行4分"
+  ],
+  "src": [
+   "https://tabelog.com/tokyo/A1303/A130301/13160341/",
+   "https://www.tokumasa.net/jyoutoucurry_tokyo01"
+  ],
+  "lvl": "exit"
+ },
+ "menchirashi": {
+  "name": "麺散（原宿）",
+  "s": "明治神宮前〈原宿〉",
+  "e": "7号",
+  "m": 5,
+  "alt": [
+   "JR 原宿 步行10分"
+  ],
+  "nt": "出口取自店方在食べログ公开的交通信息",
+  "src": [
+   "https://tabelog.com/tokyo/A1306/A130601/13225567/"
+  ],
+  "lvl": "exit"
+ },
+ "levain": {
+  "name": "ルヴァン 富ヶ谷店（Levain）",
+  "s": "代々木八幡",
+  "m": 5,
+  "alt": [
+   "千代田线 代々木公園 步行6分"
+  ],
+  "src": [
+   "https://tabelog.com/tokyo/A1318/A131810/13001841/",
+   "https://www.timeout.jp/tokyo/ja/%E3%83%AC%E3%82%B9%E3%83%88%E3%83%A9%E3%83%B3/levain-tomigaya"
+  ],
+  "lvl": "station"
+ },
+ "abura": {
+  "name": "東京油組総本店 渋谷組",
+  "s": "JR 渋谷",
+  "e": "新南口",
+  "m": 2,
+  "alt": [
+   "渋谷 南口 步行3分"
+  ],
+  "src": [
+   "https://www.tokyo-aburasoba.com/shop/",
+   "https://tabelog.com/tokyo/A1303/A130301/13051249/"
+  ],
+  "lvl": "exit"
+ },
+ "kushitaro": {
+  "name": "串タロー 本店（新宿）",
+  "s": "JR 新宿",
+  "e": "东南口",
+  "m": 1,
+  "alt": [
+   "JR 新宿 ルミネ口 步行1分"
+  ],
+  "src": [
+   "https://kushitaro.com/",
+   "https://tabelog.com/tokyo/A1304/A130401/13033198/"
+  ],
+  "lvl": "exit"
+ }
 }
