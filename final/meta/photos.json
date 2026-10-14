@@ -141,6 +141,16 @@
    "illustrative": true,
    "origin": "reused from v5"
   },
+  "biotop": {
+   "name": "Biotop 白金台",
+   "file": "img/biotop-1.webp",
+   "caption": "示意图：白金台街景（非本店） · 📷 Syced · CC0 · Wikimedia Commons",
+   "source": "https://commons.wikimedia.org/wiki/File:Street_in_Shirokanedai.jpg",
+   "license": "CC0",
+   "author": "Syced",
+   "illustrative": true,
+   "origin": "new (this build)"
+  },
   "cityview": {
    "name": "东京 City View（六本木之丘）",
    "file": "img/cityview-1.webp",
