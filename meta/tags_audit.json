@@ -1,0 +1,31 @@
+{
+ "checked": "2026-10-14",
+ "booking_added": [
+  "sky",
+  "teamlab",
+  "nezu",
+  "afuri"
+ ],
+ "fixes": [
+  [
+   "afuri",
+   "c food→dine, t lo, pr ¥1,000–2,000, RSV 予約不可",
+   "https://tabelog.com/tokyo/A1306/A130601/13095244/"
+  ],
+  [
+   "yokocho",
+   "c food→dine, t lo, pr 各店不同",
+   "居酒屋横丁"
+  ],
+  [
+   "2121",
+   "c shop→walk",
+   "设计展馆"
+  ],
+  [
+   "toriyoshi",
+   "pr ¥6,000–8,000→¥10,000–15,000",
+   "https://tabelog.com/tokyo/A1317/A131701/13003200/"
+  ]
+ ]
+}

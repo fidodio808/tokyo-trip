@@ -135,18 +135,6 @@
    "世田谷代田 步行约5–6分"
   ]
  },
- "cdg": {
-  "name": "COMME des GARÇONS 青山店",
-  "s": "表参道",
-  "e": "A5",
-  "m": 2,
-  "lvl": "exit",
-  "src": [
-   "https://harao.tokyo/sites/hro/shoppage/15166/1",
-   "http://www.omotesando-info.com/shop/fashion/shop/commedesgarcons-aoyama.html"
-  ],
-  "nt": "来源写1–2分"
- },
  "cityview": {
   "name": "东京 City View（六本木之丘）",
   "s": "六本木",
@@ -346,16 +334,6 @@
   "src": [
    "https://ichiran.com/shop/tokyo/shibuya/"
   ]
- },
- "issey": {
-  "name": "ISSEY MIYAKE / AOYAMA",
-  "s": "表参道",
-  "m": 1,
-  "lvl": "station",
-  "src": [
-   "https://www.tokyoartbeat.com/venues/-/issey-miyake-aoyama"
-  ],
-  "nt": "仅1个非官方来源写 A4，暂不标出口"
  },
  "ivy": {
   "name": "代官山 IVY PLACE",
@@ -698,17 +676,6 @@
    "半藏门线 B1 步行3分"
   ],
   "nt": "B2 为大江户线侧出口"
- },
- "prada": {
-  "name": "Prada 青山旗舰店建筑",
-  "s": "表参道",
-  "e": "A5",
-  "m": 2,
-  "lvl": "exit",
-  "src": [
-   "https://harao.tokyo/sites/hro/shoppage/510/1",
-   "https://haken.rikunabi.com/viewjob/e47ded6a07f34b3e/"
-  ]
  },
  "pulsare": {
   "name": "PULSARE（プルサーレ）",

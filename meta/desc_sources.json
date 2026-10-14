@@ -31,22 +31,6 @@
   ],
   "note": "人均/订位/付款部分沿用已核实的 RSV 与 reservations.json；标注“建议”的为判断"
  },
- "cdg": {
-  "name": "COMME des GARÇONS 青山店",
-  "type": "walk",
-  "sources": [
-   "https://www.comme-des-garcons.com/stores/"
-  ],
-  "note": "人均/订位/付款部分沿用已核实的 RSV 与 reservations.json；标注“建议”的为判断"
- },
- "prada": {
-  "name": "Prada 青山旗舰店建筑",
-  "type": "walk",
-  "sources": [
-   "https://www.prada.com/jp/ja/pradasphere/places/epicenter-tokyo.html"
-  ],
-  "note": "人均/订位/付款部分沿用已核实的 RSV 与 reservations.json；标注“建议”的为判断"
- },
  "yoke": {
   "name": "YOKE Aoyama Flagship Store",
   "type": "shop",
@@ -519,14 +503,6 @@
   "type": "walk",
   "sources": [
    "https://mag.tecture.jp/culture/20201009-15571/"
-  ],
-  "note": "人均/订位/付款部分沿用已核实的 RSV 与 reservations.json；标注“建议”的为判断"
- },
- "issey": {
-  "name": "ISSEY MIYAKE / AOYAMA",
-  "type": "shop",
-  "sources": [
-   "https://www.tokyoartbeat.com/venues/-/issey-miyake-aoyama"
   ],
   "note": "人均/订位/付款部分沿用已核实的 RSV 与 reservations.json；标注“建议”的为判断"
  },
