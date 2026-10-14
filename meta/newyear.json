@@ -55,32 +55,6 @@
    ],
    "note": "初诣期间开放（参拜时间随日出日落）"
   },
-  "cdg": {
-   "n": "COMME des GARÇONS 青山店",
-   "z": 1,
-   "c": "walk",
-   "jan1": "休",
-   "jan2": "休",
-   "jan3": "开",
-   "basis": "往年先例",
-   "sources": [
-    "https://tenpomap.blogspot.com/2019/12/cdg.html"
-   ],
-   "note": "2019–20 先例（第三方店铺地图博客）：12/30–1/2 休，1/3 营业；较旧"
-  },
-  "prada": {
-   "n": "Prada 青山旗舰店建筑",
-   "z": 1,
-   "c": "walk",
-   "jan1": "开",
-   "jan2": "开",
-   "jan3": "开",
-   "basis": "公共空间/建筑外观",
-   "sources": [
-    "https://www.prada.com/jp/ja/store-locator/japan/prada_tokyo_aoyama/S443"
-   ],
-   "note": "建筑外观可看；店内营业未知"
-  },
   "yoke": {
    "n": "YOKE Aoyama Flagship Store",
    "z": 1,
@@ -841,19 +815,6 @@
    "basis": "公共空间/建筑外观",
    "sources": [],
    "note": "户外/建筑外观或参拜道，全天或常时开放；店铺/设施另计"
-  },
-  "issey": {
-   "n": "ISSEY MIYAKE / AOYAMA",
-   "z": 1,
-   "c": "shop",
-   "jan1": "休",
-   "jan2": "休",
-   "jan3": "开",
-   "basis": "去年先例",
-   "sources": [
-    "https://www.isseymiyake.com/blogs/news/18290"
-   ],
-   "note": "去年：IM MEN/AOYAMA 等 12/30 营业至年内，1/3 起营业"
   },
   "artsci": {
    "n": "Arts & Science 青山",

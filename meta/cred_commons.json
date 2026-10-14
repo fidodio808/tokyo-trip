@@ -56,22 +56,6 @@
    "t": "File:Meiji-jingu-pathway.jpg"
   }
  ],
- "prada": [
-  {
-   "f": "img/prada-1.webp",
-   "by": "Wiiii",
-   "lic": "CC BY-SA 3.0",
-   "src": "https://commons.wikimedia.org/wiki/File:PRADA_BOUTIQUE_AOYAMA.jpg",
-   "t": "File:PRADA BOUTIQUE AOYAMA.jpg"
-  },
-  {
-   "f": "img/prada-2.webp",
-   "by": "Kakidai",
-   "lic": "CC BY-SA 4.0",
-   "src": "https://commons.wikimedia.org/wiki/File:PRADA_AOYAMA_2.jpg",
-   "t": "File:PRADA AOYAMA 2.jpg"
-  }
- ],
  "meguro": [
   {
    "f": "img/meguro-1.webp",
@@ -439,15 +423,6 @@
    "lic": "CC BY 2.0",
    "src": "https://commons.wikimedia.org/wiki/File:Kiyosumi_Garden_(11302018475).jpg",
    "t": "File:Kiyosumi Garden (11302018475).jpg"
-  }
- ],
- "issey": [
-  {
-   "f": "img/issey-1.webp",
-   "by": "Kakidai",
-   "lic": "CC BY-SA 4.0",
-   "src": "https://commons.wikimedia.org/wiki/File:Issey_Miyake_-_Aoyama.jpg",
-   "t": "File:Issey Miyake - Aoyama.jpg"
   }
  ],
  "hotel": [

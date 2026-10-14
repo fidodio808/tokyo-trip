@@ -523,48 +523,6 @@
    ]
   }
  },
- "cdg": {
-  "name": "COMME des GARÇONS 青山店",
-  "sources": [
-   "https://harao.tokyo/sites/hro/shoppage/15166/1",
-   "http://www.omotesando-info.com/shop/fashion/shop/commedesgarcons-aoyama.html",
-   "https://fashion.latte.la/shop/commedesgarcons-aoyama"
-  ],
-  "origin": "2026-10-12 新增核实",
-  "hours": {
-   "w": [
-    [
-     660,
-     1200
-    ],
-    [
-     660,
-     1200
-    ],
-    [
-     660,
-     1200
-    ],
-    [
-     660,
-     1200
-    ],
-    [
-     660,
-     1200
-    ],
-    [
-     660,
-     1200
-    ],
-    [
-     660,
-     1200
-    ]
-   ],
-   "irr": 1
-  }
- },
  "cityview": {
   "name": "东京 City View（六本木之丘）",
   "sources": [
@@ -1182,47 +1140,6 @@
      "l": "7:30–8:30 暂停营业",
      "x": 0
     }
-   ]
-  }
- },
- "issey": {
-  "name": "ISSEY MIYAKE / AOYAMA",
-  "sources": [
-   "https://harao.tokyo/sites/hro/shoppage/15239/1",
-   "http://www.omotesando-info.com/shop/fashion/shop/isseymiyake-aoyama.html",
-   "https://www.tokyoartbeat.com/venues/-/issey-miyake-aoyama"
-  ],
-  "origin": "2026-10-12 新增核实",
-  "hours": {
-   "w": [
-    [
-     660,
-     1200
-    ],
-    [
-     660,
-     1200
-    ],
-    [
-     660,
-     1200
-    ],
-    [
-     660,
-     1200
-    ],
-    [
-     660,
-     1200
-    ],
-    [
-     660,
-     1200
-    ],
-    [
-     660,
-     1200
-    ]
    ]
   }
  },
@@ -2713,46 +2630,6 @@
    ],
    "cl": "周一",
    "nt": "12:30–13:30 午休；周一逢节假日改周二休"
-  }
- },
- "prada": {
-  "name": "Prada 青山旗舰店建筑",
-  "sources": [
-   "https://www.prada.com/jp/ja/store-locator/japan/prada_tokyo_aoyama/S443",
-   "https://harao.tokyo/sites/hro/shoppage/510/1"
-  ],
-  "origin": "2026-10-12 新增核实",
-  "hours": {
-   "w": [
-    [
-     660,
-     1200
-    ],
-    [
-     660,
-     1200
-    ],
-    [
-     660,
-     1200
-    ],
-    [
-     660,
-     1200
-    ],
-    [
-     660,
-     1200
-    ],
-    [
-     660,
-     1200
-    ],
-    [
-     660,
-     1200
-    ]
-   ]
   }
  },
  "pulsare": {
