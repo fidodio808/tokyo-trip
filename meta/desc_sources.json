@@ -939,5 +939,28 @@
    "https://www.kanko-shinjuku.jp/"
   ],
   "note": "新宿 zone 新增；标“建议”的为判断"
+ },
+ "mametoranaka": {
+  "name": "注文焙煎 豆虎 中目黒焙煎所",
+  "type": "food",
+  "sources": [
+   "https://www.mametora.jp/home",
+   "https://www.mametora.jp/shopinfo",
+   "https://tabelog.com/tokyo/A1317/A131701/13221895/",
+   "https://tabelog.com/tw/tokyo/A1317/A131701/13221895/"
+  ],
+  "note": "5 级烘焙/假货公告=官网；长椅=食べログ备注；モカリッチソフト=食べログ 2026/5 点评"
+ },
+ "mametoraao": {
+  "name": "注文焙煎 豆虎 青山焙煎所",
+  "type": "food",
+  "sources": [
+   "https://www.mametora.jp/home",
+   "https://www.mametora.jp/shopinfo",
+   "https://tabelog.com/tokyo/A1303/A130301/13258344/",
+   "https://thistokyo.com/ja/shibuya-ku/mametora/",
+   "https://retty.me/area/PRE13/ARE8/SUB805/100001581085/"
+  ],
+  "note": "座位=THISTOKYO；モカリッチソフト=Retty 2021 点评，现是否供应未确认"
  }
 }

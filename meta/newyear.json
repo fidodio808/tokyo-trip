@@ -1541,6 +1541,32 @@
     "https://tabelog.com/tokyo/A1304/A130401/13033198/"
    ],
    "note": "未找到年末年始安排"
+  },
+  "mametoranaka": {
+   "n": "注文焙煎 豆虎 中目黒焙煎所",
+   "z": 3,
+   "c": "food",
+   "jan1": "未知",
+   "jan2": "未知",
+   "jan3": "未知",
+   "basis": "待确认",
+   "sources": [
+    "https://www.mametora.jp/home"
+   ],
+   "note": "官网只公布过网店年末年始发货安排，未找到门店元旦营业信息"
+  },
+  "mametoraao": {
+   "n": "注文焙煎 豆虎 青山焙煎所",
+   "z": 1,
+   "c": "food",
+   "jan1": "未知",
+   "jan2": "未知",
+   "jan3": "未知",
+   "basis": "待确认",
+   "sources": [
+    "https://www.mametora.jp/home"
+   ],
+   "note": "官网只公布过网店年末年始发货安排，未找到门店元旦营业信息"
   }
  }
 }

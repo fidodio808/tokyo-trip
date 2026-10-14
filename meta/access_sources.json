@@ -1178,5 +1178,29 @@
    "https://tabelog.com/tokyo/A1304/A130401/13033198/"
   ],
   "lvl": "exit"
+ },
+ "mametoranaka": {
+  "name": "注文焙煎 豆虎 中目黒焙煎所",
+  "lvl": "station",
+  "s": "中目黒",
+  "m": 1,
+  "nt": "出口未经两源一致确认（IceMap 写正面口；中目黒情报站写出检票口往北即到），只写车站",
+  "src": [
+   "https://www.mametora.jp/shopinfo",
+   "https://tabelog.com/tokyo/A1317/A131701/13221895/"
+  ]
+ },
+ "mametoraao": {
+  "name": "注文焙煎 豆虎 青山焙煎所",
+  "lvl": "station",
+  "s": "表参道",
+  "m": 5,
+  "alt": [
+   "JR 渋谷 步行10分"
+  ],
+  "src": [
+   "https://www.mametora.jp/shopinfo",
+   "https://tabelog.com/tokyo/A1303/A130301/13258344/"
+  ]
  }
 }
