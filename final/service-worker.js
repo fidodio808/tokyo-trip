@@ -1,0 +1,20 @@
+/* 东京行程 最终版 Service Worker — 自动生成，服务于 /final/ 子路径。
+   缓存名前缀用 "tkfinal-"（不用 "tokyo-"）：根目录 v5 的 SW 在 activate 时会删除所有 "tokyo-" 开头且非自己的缓存。 */
+const VER="76bbde9f4c";
+const PRE="tkfinal-pre-"+VER, RT="tkfinal-rt-"+VER, TILES="tkfinal-tiles-v1", TILE_MAX=200;
+const ASSETS=["./","index.html","manifest.json","icons/icon-180.png","icons/icon-192.png","icons/icon-512.png","img/2121-1.webp","img/afuri-1.webp","img/afurinakame-1.webp","img/afuriroppongi-1.webp","img/arabica-1.webp","img/asakura-1.webp","img/azabu-1.webp","img/azamarket-1.webp","img/azashop-1.webp","img/bb-1.webp","img/biocaf-1.webp","img/cityview-1.webp","img/d47-1.webp","img/donut-1.webp","img/egp-1.webp","img/fuglen-1.webp","img/gatou-1.webp","img/gyozaro-1.webp","img/gyre-1.webp","img/harakado-1.webp","img/hino-1.webp","img/hyotan-1.webp","img/ichiranshibuya-1.webp","img/ivy-1.webp","img/kawakami-1.webp","img/kirin-1.webp","img/kitsune-1.webp","img/littlenap-1.webp","img/logroad-1.webp","img/maisen-1.webp","img/mameya-1.webp","img/meguro-1.webp","img/meiji-1.webp","img/miya-1.webp","img/miyashiro-1.webp","img/miyota-1.webp","img/motomura-1.webp","img/nacamo-1.webp","img/nature-1.webp","img/nezu-1.webp","img/nodaiwa-1.webp","img/node-1.webp","img/nozy-1.webp","img/okura-1.webp","img/onibus-1.webp","img/ota-1.webp","img/parco-1.webp","img/photo-1.webp","img/pulsare-1.webp","img/roastery-1.webp","img/saigo-1.webp","img/shiba-1.webp","img/shozo-1.webp","img/sky-1.webp","img/skyroom-1.webp","img/spiral-1.webp","img/sunny-1.webp","img/sushiazabu-1.webp","img/tagetsu-1.webp","img/taro-1.webp","img/teahouse-1.webp","img/teamlab-1.webp","img/toranomon-1.webp","img/toritake-1.webp","img/toriyoshi-1.webp","img/tower-1.webp","img/tsite-1.webp","img/ukai-1.webp","img/uobei-1.webp","img/yokocho-1.webp","img/yoroniku-1.webp","img/yoyogi-1.webp"];
+self.addEventListener("install",e=>{e.waitUntil(caches.open(PRE).then(c=>Promise.all(ASSETS.map(u=>c.add(new Request(u,{cache:"reload"})).catch(()=>{})))).then(()=>self.skipWaiting()))});
+self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k.startsWith("tkfinal-")&&k!==PRE&&k!==RT&&k!==TILES).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
+const BASE=new URL("./",self.registration.scope).href;
+const IDX=new URL("index.html",BASE).href;
+async function trimTiles(){try{const c=await caches.open(TILES);const ks=await c.keys();for(let i=0;i<ks.length-TILE_MAX;i++)await c.delete(ks[i])}catch(e){}}
+async function swrIndex(e){const c=await caches.open(PRE);const hit=await c.match(IDX);
+ const net=fetch(IDX,{cache:"no-cache"}).then(r=>{if(r&&r.ok)return c.put(IDX,r.clone()).then(()=>r);return r}).catch(()=>null);
+ if(hit){e.waitUntil(net);return hit}const r=await net;return r||new Response("<h3>离线中，且尚未缓存</h3>",{status:503,headers:{"Content-Type":"text/html;charset=utf-8"}})}
+async function cacheFirst(req){const c=await caches.open(PRE);const hit=await c.match(req,{ignoreSearch:true})||await caches.match(req,{ignoreSearch:true,cacheName:RT});if(hit)return hit;const r=await fetch(req);if(r&&r.ok){const rc=await caches.open(RT);rc.put(req,r.clone())}return r}
+async function tile(e){const c=await caches.open(TILES);const hit=await c.match(e.request);if(hit)return hit;try{const r=await fetch(e.request);if(r&&(r.ok||r.type==="opaque")){await c.put(e.request,r.clone());e.waitUntil(trimTiles())}return r}catch(err){return new Response("",{status:504})}}
+self.addEventListener("fetch",e=>{const req=e.request;if(req.method!=="GET")return;let u;try{u=new URL(req.url)}catch(_){return}
+ if(u.hostname==="cyberjapandata.gsi.go.jp"){e.respondWith(tile(e));return}
+ if(u.origin!==self.location.origin||!u.href.startsWith(BASE))return;
+ if(req.mode==="navigate"||u.href===IDX||u.href===BASE){e.respondWith(swrIndex(e));return}
+ e.respondWith(cacheFirst(req))});
