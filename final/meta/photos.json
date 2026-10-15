@@ -291,16 +291,6 @@
    "illustrative": false,
    "origin": "new (this build)"
   },
-  "hotel": {
-   "name": "三井ガーデンホテル五反田（住宿）",
-   "file": "img/hotel-1.webp",
-   "caption": "📷 Syced · CC0 · Wikimedia Commons",
-   "source": "https://commons.wikimedia.org/wiki/File:Mitsui_Garden_Hotel_Gotanda.jpg",
-   "license": "CC0",
-   "author": "Syced",
-   "illustrative": false,
-   "origin": "new (this build)"
-  },
   "hyotan": {
    "name": "ひょうたん（神宮前）",
    "file": "img/hyotan-1.webp",
