@@ -940,6 +940,16 @@
    "author": "",
    "illustrative": false,
    "origin": "reused from v5"
+  },
+  "serita": {
+   "name": "炭せりた（せりた）",
+   "file": "img/serita-1.webp",
+   "caption": "示意图：烤肉（非本店） · 📷 Jonathan Lin · CC BY-SA 2.0 · Wikimedia Commons",
+   "source": "https://commons.wikimedia.org/wiki/File:Yakiniku_002.jpg",
+   "license": "CC BY-SA 2.0",
+   "author": "Jonathan Lin",
+   "illustrative": true,
+   "origin": "reused yakiniku photo; backup dinner only"
   }
  }
 }
