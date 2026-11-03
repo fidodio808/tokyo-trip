@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>东京周六 Citywalk｜午饭三选一 · 距离优化</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+:root{--ink:#17212b;--muted:#667085;--line:#e7eaf0;--blue:#2557d6;--bg:#f5f7fb;--card:#fff}
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink)}
+header{padding:22px 24px 16px;background:#101c32;color:#fff}
+h1{font-size:22px;margin:0 0 8px;font-weight:700}header p{margin:0;color:#cbd5e1;font-size:13px;line-height:1.6}
+.layout{display:grid;grid-template-columns:400px 1fr;height:calc(100vh - 104px);min-height:620px}
+aside{overflow:auto;padding:16px;border-right:1px solid var(--line)}
+#map{height:100%;min-height:620px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 3px 12px #1a2a4a08}
+.pills{display:flex;gap:7px;flex-wrap:wrap;margin:8px 0}
+.pill{font-size:12px;border-radius:20px;padding:6px 9px;background:#eef2ff;color:#3449a8}
+.pill.fixed{background:#fff0e8;color:#9b3c10}.pill.optional{background:#f1f3f6;color:#626b78}.pill.lunch{background:#e7f8ef;color:#0f7a45}
+.controls{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}
+button{border:1px solid #d8deea;background:white;color:#253047;border-radius:9px;padding:8px 10px;font-size:12px;cursor:pointer}
+button.active{background:#172b50;color:white;border-color:#172b50}
+button.lunchBtn.active{background:#0f7a45;border-color:#0f7a45}
+.stop{display:grid;grid-template-columns:26px 1fr auto;gap:8px;align-items:start;padding:10px 0;border-bottom:1px solid #eef0f4}
+.stop:last-child{border-bottom:0}.num{width:24px;height:24px;border-radius:50%;background:#e8edff;color:#2348b8;display:grid;place-items:center;font-size:12px;font-weight:700}
+.stop.fixed .num{background:#ffe4d3;color:#a33d0b}.stop.optional{opacity:.78}.stop.lunch .num{background:#c9f0da;color:#0f7a45}
+.stop-name{font-size:13px;font-weight:650;line-height:1.35}.stop-meta{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.5}
+.stop-actions{display:flex;flex-direction:column;gap:5px}.stop-actions a{font-size:11px;color:var(--blue);text-decoration:none;white-space:nowrap}
+label{font-size:12px;color:#475467;display:flex;gap:6px;align-items:center}
+.note{font-size:12px;color:var(--muted);line-height:1.65}
+h2{font-size:14px;margin:0 0 8px}
+#routeMeta{font-size:12px;color:#3449a8;margin-top:6px}
+.leaflet-popup-content{font-family:inherit;line-height:1.5}.leaflet-popup-content a{color:#2557d6}
+@media(max-width:800px){.layout{grid-template-columns:1fr;height:auto}.layout aside{order:2}.layout #map{order:1;height:54vh;min-height:400px}header{padding:18px}.layout{min-height:0}}
+</style>
+</head>
+<body>
+<header>
+  <h1>东京周六 Citywalk｜午饭三选一</h1>
+  <p>固定：PREMIER MAI → … → 18:00 新井屋　｜　切换午饭会重算整条编号顺序　｜　最近邻 + 2-opt　｜　坐标来自线上 final</p>
+</header>
+<div class="layout">
+<aside>
+  <div class="card">
+    <h2>午饭（三选一，会重排动线）</h2>
+    <div class="controls">
+      <button class="lunchBtn active" data-lunch="kawakami">川上庵 · 荞麦</button>
+      <button class="lunchBtn" data-lunch="ericsouth">Eric South · 印餐</button>
+      <button class="lunchBtn" data-lunch="gapao">ガパオ · 泰餐</button>
+    </div>
+    <div id="routeMeta"></div>
+    <div class="note" style="margin-top:8px">印餐贴在 Snow Peak / V.A. 一带，偏上午末；泰餐在 YOKE 后进南青山；荞麦贴 HB，偏下午初。只吃一家。</div>
+  </div>
+  <div class="card">
+    <h2>路线控制</h2>
+    <div class="pills"><span class="pill fixed">固定</span><span class="pill">必去</span><span class="pill lunch">午饭</span><span class="pill optional">非必去</span></div>
+    <div class="controls">
+      <button class="active" id="allBtn">全部地点</button>
+      <button id="mustBtn">只看必去+午饭</button>
+      <button id="routeBtn">显示建议路线</button>
+      <button id="clearBtn">清空已逛</button>
+    </div>
+  </div>
+  <div class="card">
+    <h2>地点清单</h2>
+    <div id="stops"></div>
+  </div>
+  <div class="card">
+    <h2>算法说明</h2>
+    <div class="note">必去店：多起点最近邻 + 2-opt；L'ÉCHOPPE→HB 粘连。午饭选中后插入最优邻段（川上庵跟 HB；Eric South 跟 Snow Peak；ガパオ 在 YOKE 与 L'ÉCHOPPE 之间）。非必去按最小绕路挂上。Nanga 仍在出青山往涩谷出口。</div>
+  </div>
+</aside>
+<div id="map"></div>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const variants = {"kawakami": {"label": "川上庵（主推）", "must_m": 5832, "full_m": 7723, "places": [{"id": 1, "key": "premiermai", "name": "PREMIER MAI", "detail": "早餐固定｜厚吐司／法式吐司 · 不收现金", "area": "富ヶ谷", "lat": 35.66915, "lng": 139.69095, "query": "プルミエメ PREMIER MAI 富ヶ谷", "fixed": true, "optional": false, "lunch": false, "time": "09:00–10:30"}, {"id": 2, "key": "yoyogi", "name": "代代木公园", "detail": "非必去｜早饭后若早可转一圈", "area": "代代木", "lat": 35.67141, "lng": 139.69517, "query": "代々木公園", "fixed": false, "optional": true, "lunch": false, "time": "可选"}, {"id": 3, "key": "gr8", "name": "GR8（拉福雷）", "detail": "买手店｜奢侈×街头×球鞋", "area": "原宿", "lat": 35.66908, "lng": 139.7054, "query": "GR8（グレイト）", "fixed": false, "optional": false, "lunch": false, "time": "#3"}, {"id": 4, "key": "snowpeak", "name": "Snow Peak 表参道", "detail": "重点｜Everyday Down 女款黑", "area": "表参道", "lat": 35.66875, "lng": 139.70615, "query": "Snow Peak 表参道", "fixed": false, "optional": false, "lunch": false, "time": "#4"}, {"id": 5, "key": "va", "name": "V.A. TOKYO", "detail": "概念店｜可问 Unlikely", "area": "神宫前／表参道", "lat": 35.66781, "lng": 139.70651, "query": "V.A. TOKYO", "fixed": false, "optional": false, "lunch": false, "time": "#5"}, {"id": 6, "key": "nemeth", "name": "Christopher Nemeth", "detail": "设计师品牌", "area": "神宫前", "lat": 35.6682, "lng": 139.7084, "query": "Christopher Nemeth 神宮前", "fixed": false, "optional": false, "lunch": false, "time": "#6"}, {"id": 7, "key": "tabaya", "name": "TABAYA United Arrows", "detail": "选品店｜神宮前3-28-1", "area": "神宫前", "lat": 35.6721, "lng": 139.70952, "query": "TABAYA United Arrows 神宮前3-28-1", "fixed": false, "optional": false, "lunch": false, "time": "#7"}, {"id": 8, "key": "union", "name": "UNION TOKYO", "detail": "可问 Unlikely｜行前看 IG", "area": "神宫前", "lat": 35.6739, "lng": 139.71042, "query": "UNION TOKYO", "fixed": false, "optional": false, "lunch": false, "time": "#8"}, {"id": 9, "key": "apresse", "name": "A.PRESSE", "detail": "非必去｜专卖；select 已覆盖可跳", "area": "神宫前", "lat": 35.67255, "lng": 139.71235, "query": "A.PRESSE 神宮前", "fixed": false, "optional": true, "lunch": false, "time": "可选"}, {"id": 10, "key": "yoke", "name": "YOKE Aoyama", "detail": "男装旗舰", "area": "青山北", "lat": 35.6711, "lng": 139.7145, "query": "YOKE Aoyama Flagship Store", "fixed": false, "optional": false, "lunch": false, "time": "#10"}, {"id": 11, "key": "lechoppe", "name": "L'ÉCHOPPE 青山", "detail": "男装选品｜周六留意发售", "area": "青山", "lat": 35.6646, "lng": 139.7142, "query": "L'ÉCHOPPE 青山", "fixed": false, "optional": false, "lunch": false, "time": "#11"}, {"id": 12, "key": "hb", "name": "H BEAUTY&YOUTH", "detail": "南青山 3-14-17", "area": "南青山", "lat": 35.6653, "lng": 139.7148, "query": "H BEAUTY&YOUTH 南青山", "fixed": false, "optional": false, "lunch": false, "time": "#12"}, {"id": 13, "key": "kawakami", "name": "青山 川上庵", "detail": "午饭选项｜主推荞麦 · 周末午常排队", "area": "南青山", "lat": 35.66528, "lng": 139.71478, "query": "青山 川上庵", "fixed": false, "optional": false, "lunch": true, "time": "午饭·三选一"}, {"id": 14, "key": "comoli", "name": "COMOLI 南青山", "detail": "非必去", "area": "南青山", "lat": 35.662, "lng": 139.716, "query": "COMOLI 南青山", "fixed": false, "optional": true, "lunch": false, "time": "可选"}, {"id": 15, "key": "auralee", "name": "AURALEE TOKYO", "detail": "非必去", "area": "青山", "lat": 35.66114, "lng": 139.71644, "query": "AURALEE 青山", "fixed": false, "optional": true, "lunch": false, "time": "可选"}, {"id": 16, "key": "cdg", "name": "CDG 青山", "detail": "非必去｜select 已覆盖可跳", "area": "南青山", "lat": 35.6654, "lng": 139.7122, "query": "コムデギャルソン 青山", "fixed": false, "optional": true, "lunch": false, "time": "可选"}, {"id": 17, "key": "maxmara", "name": "Max Mara 青山", "detail": "女装", "area": "南青山", "lat": 35.66318, "lng": 139.71111, "query": "Max Mara 青山店", "fixed": false, "optional": false, "lunch": false, "time": "#17"}, {"id": 18, "key": "ldk", "name": "1LDK AOYAMA", "detail": "看 Maatee&Sons｜取替 LOFTMAN", "area": "神宫前／青山学院", "lat": 35.66364, "lng": 139.70869, "query": "1LDK AOYAMA", "fixed": false, "optional": false, "lunch": false, "time": "#18"}, {"id": 19, "key": "nanga", "name": "NANGA SHOP HARAJUKU", "detail": "重点｜女款黑羽绒｜出青山往涩谷顺路", "area": "原宿・明治通", "lat": 35.665683, "lng": 139.704148, "query": "NANGA SHOP HARAJUKU", "fixed": false, "optional": false, "lunch": false, "time": "#19"}, {"id": 20, "key": "sky", "name": "Shibuya Sky", "detail": "非必去｜有空且预约合适再上", "area": "涩谷", "lat": 35.658, "lng": 139.7023, "query": "Shibuya Sky", "fixed": false, "optional": true, "lunch": false, "time": "可选"}, {"id": 21, "key": "parco", "name": "涩谷 PARCO", "detail": "商场补逛", "area": "涩谷", "lat": 35.66221, "lng": 139.6992, "query": "渋谷PARCO", "fixed": false, "optional": false, "lunch": false, "time": "#21"}, {"id": 22, "key": "montbell", "name": "mont-bell 涩谷", "detail": "户外／羽绒备选", "area": "涩谷", "lat": 35.66242, "lng": 139.69757, "query": "モンベル 渋谷店", "fixed": false, "optional": false, "lunch": false, "time": "#22"}, {"id": 23, "key": "araiya", "name": "新井屋 渋谷", "detail": "18:00 固定｜道玄坂 2-19-13 · HRCLRT", "area": "涩谷・道玄坂", "lat": 35.65934, "lng": 139.69632, "query": "焼肉ホルモン 新井屋 渋谷", "fixed": true, "optional": false, "lunch": false, "time": "18:00"}]}, "ericsouth": {"label": "Eric South（印餐）", "must_m": 6028, "full_m": 7917, "places": [{"id": 1, "key": "premiermai", "name": "PREMIER MAI", "detail": "早餐固定｜厚吐司／法式吐司 · 不收现金", "area": "富ヶ谷", "lat": 35.66915, "lng": 139.69095, "query": "プルミエメ PREMIER MAI 富ヶ谷", "fixed": true, "optional": false, "lunch": false, "time": "09:00–10:30"}, {"id": 2, "key": "yoyogi", "name": "代代木公园", "detail": "非必去｜早饭后若早可转一圈", "area": "代代木", "lat": 35.67141, "lng": 139.69517, "query": "代々木公園", "fixed": false, "optional": true, "lunch": false, "time": "可选"}, {"id": 3, "key": "gr8", "name": "GR8（拉福雷）", "detail": "买手店｜奢侈×街头×球鞋", "area": "原宿", "lat": 35.66908, "lng": 139.7054, "query": "GR8（グレイト）", "fixed": false, "optional": false, "lunch": false, "time": "#3"}, {"id": 4, "key": "snowpeak", "name": "Snow Peak 表参道", "detail": "重点｜Everyday Down 女款黑", "area": "表参道", "lat": 35.66875, "lng": 139.70615, "query": "Snow Peak 表参道", "fixed": false, "optional": false, "lunch": false, "time": "#4"}, {"id": 5, "key": "ericsouth", "name": "Eric South Masala Diner", "detail": "午饭选项｜印餐 · 神宫前", "area": "神宫前", "lat": 35.6689, "lng": 139.7058, "query": "Eric South Masala Diner 神宮前", "fixed": false, "optional": false, "lunch": true, "time": "午饭·三选一"}, {"id": 6, "key": "va", "name": "V.A. TOKYO", "detail": "概念店｜可问 Unlikely", "area": "神宫前／表参道", "lat": 35.66781, "lng": 139.70651, "query": "V.A. TOKYO", "fixed": false, "optional": false, "lunch": false, "time": "#6"}, {"id": 7, "key": "nemeth", "name": "Christopher Nemeth", "detail": "设计师品牌", "area": "神宫前", "lat": 35.6682, "lng": 139.7084, "query": "Christopher Nemeth 神宮前", "fixed": false, "optional": false, "lunch": false, "time": "#7"}, {"id": 8, "key": "tabaya", "name": "TABAYA United Arrows", "detail": "选品店｜神宮前3-28-1", "area": "神宫前", "lat": 35.6721, "lng": 139.70952, "query": "TABAYA United Arrows 神宮前3-28-1", "fixed": false, "optional": false, "lunch": false, "time": "#8"}, {"id": 9, "key": "union", "name": "UNION TOKYO", "detail": "可问 Unlikely｜行前看 IG", "area": "神宫前", "lat": 35.6739, "lng": 139.71042, "query": "UNION TOKYO", "fixed": false, "optional": false, "lunch": false, "time": "#9"}, {"id": 10, "key": "apresse", "name": "A.PRESSE", "detail": "非必去｜专卖；select 已覆盖可跳", "area": "神宫前", "lat": 35.67255, "lng": 139.71235, "query": "A.PRESSE 神宮前", "fixed": false, "optional": true, "lunch": false, "time": "可选"}, {"id": 11, "key": "yoke", "name": "YOKE Aoyama", "detail": "男装旗舰", "area": "青山北", "lat": 35.6711, "lng": 139.7145, "query": "YOKE Aoyama Flagship Store", "fixed": false, "optional": false, "lunch": false, "time": "#11"}, {"id": 12, "key": "lechoppe", "name": "L'ÉCHOPPE 青山", "detail": "男装选品｜周六留意发售", "area": "青山", "lat": 35.6646, "lng": 139.7142, "query": "L'ÉCHOPPE 青山", "fixed": false, "optional": false, "lunch": false, "time": "#12"}, {"id": 13, "key": "hb", "name": "H BEAUTY&YOUTH", "detail": "南青山 3-14-17", "area": "南青山", "lat": 35.6653, "lng": 139.7148, "query": "H BEAUTY&YOUTH 南青山", "fixed": false, "optional": false, "lunch": false, "time": "#13"}, {"id": 14, "key": "comoli", "name": "COMOLI 南青山", "detail": "非必去", "area": "南青山", "lat": 35.662, "lng": 139.716, "query": "COMOLI 南青山", "fixed": false, "optional": true, "lunch": false, "time": "可选"}, {"id": 15, "key": "auralee", "name": "AURALEE TOKYO", "detail": "非必去", "area": "青山", "lat": 35.66114, "lng": 139.71644, "query": "AURALEE 青山", "fixed": false, "optional": true, "lunch": false, "time": "可选"}, {"id": 16, "key": "cdg", "name": "CDG 青山", "detail": "非必去｜select 已覆盖可跳", "area": "南青山", "lat": 35.6654, "lng": 139.7122, "query": "コムデギャルソン 青山", "fixed": false, "optional": true, "lunch": false, "time": "可选"}, {"id": 17, "key": "maxmara", "name": "Max Mara 青山", "detail": "女装", "area": "南青山", "lat": 35.66318, "lng": 139.71111, "query": "Max Mara 青山店", "fixed": false, "optional": false, "lunch": false, "time": "#17"}, {"id": 18, "key": "ldk", "name": "1LDK AOYAMA", "detail": "看 Maatee&Sons｜取替 LOFTMAN", "area": "神宫前／青山学院", "lat": 35.66364, "lng": 139.70869, "query": "1LDK AOYAMA", "fixed": false, "optional": false, "lunch": false, "time": "#18"}, {"id": 19, "key": "nanga", "name": "NANGA SHOP HARAJUKU", "detail": "重点｜女款黑羽绒｜出青山往涩谷顺路", "area": "原宿・明治通", "lat": 35.665683, "lng": 139.704148, "query": "NANGA SHOP HARAJUKU", "fixed": false, "optional": false, "lunch": false, "time": "#19"}, {"id": 20, "key": "sky", "name": "Shibuya Sky", "detail": "非必去｜有空且预约合适再上", "area": "涩谷", "lat": 35.658, "lng": 139.7023, "query": "Shibuya Sky", "fixed": false, "optional": true, "lunch": false, "time": "可选"}, {"id": 21, "key": "parco", "name": "涩谷 PARCO", "detail": "商场补逛", "area": "涩谷", "lat": 35.66221, "lng": 139.6992, "query": "渋谷PARCO", "fixed": false, "optional": false, "lunch": false, "time": "#21"}, {"id": 22, "key": "montbell", "name": "mont-bell 涩谷", "detail": "户外／羽绒备选", "area": "涩谷", "lat": 35.66242, "lng": 139.69757, "query": "モンベル 渋谷店", "fixed": false, "optional": false, "lunch": false, "time": "#22"}, {"id": 23, "key": "araiya", "name": "新井屋 渋谷", "detail": "18:00 固定｜道玄坂 2-19-13 · HRCLRT", "area": "涩谷・道玄坂", "lat": 35.65934, "lng": 139.69632, "query": "焼肉ホルモン 新井屋 渋谷", "fixed": true, "optional": false, "lunch": false, "time": "18:00"}]}, "gapao": {"label": "青山ガパオ（泰餐）", "must_m": 5958, "full_m": 7540, "places": [{"id": 1, "key": "premiermai", "name": "PREMIER MAI", "detail": "早餐固定｜厚吐司／法式吐司 · 不收现金", "area": "富ヶ谷", "lat": 35.66915, "lng": 139.69095, "query": "プルミエメ PREMIER MAI 富ヶ谷", "fixed": true, "optional": false, "lunch": false, "time": "09:00–10:30"}, {"id": 2, "key": "yoyogi", "name": "代代木公园", "detail": "非必去｜早饭后若早可转一圈", "area": "代代木", "lat": 35.67141, "lng": 139.69517, "query": "代々木公園", "fixed": false, "optional": true, "lunch": false, "time": "可选"}, {"id": 3, "key": "gr8", "name": "GR8（拉福雷）", "detail": "买手店｜奢侈×街头×球鞋", "area": "原宿", "lat": 35.66908, "lng": 139.7054, "query": "GR8（グレイト）", "fixed": false, "optional": false, "lunch": false, "time": "#3"}, {"id": 4, "key": "snowpeak", "name": "Snow Peak 表参道", "detail": "重点｜Everyday Down 女款黑", "area": "表参道", "lat": 35.66875, "lng": 139.70615, "query": "Snow Peak 表参道", "fixed": false, "optional": false, "lunch": false, "time": "#4"}, {"id": 5, "key": "va", "name": "V.A. TOKYO", "detail": "概念店｜可问 Unlikely", "area": "神宫前／表参道", "lat": 35.66781, "lng": 139.70651, "query": "V.A. TOKYO", "fixed": false, "optional": false, "lunch": false, "time": "#5"}, {"id": 6, "key": "nemeth", "name": "Christopher Nemeth", "detail": "设计师品牌", "area": "神宫前", "lat": 35.6682, "lng": 139.7084, "query": "Christopher Nemeth 神宮前", "fixed": false, "optional": false, "lunch": false, "time": "#6"}, {"id": 7, "key": "tabaya", "name": "TABAYA United Arrows", "detail": "选品店｜神宮前3-28-1", "area": "神宫前", "lat": 35.6721, "lng": 139.70952, "query": "TABAYA United Arrows 神宮前3-28-1", "fixed": false, "optional": false, "lunch": false, "time": "#7"}, {"id": 8, "key": "union", "name": "UNION TOKYO", "detail": "可问 Unlikely｜行前看 IG", "area": "神宫前", "lat": 35.6739, "lng": 139.71042, "query": "UNION TOKYO", "fixed": false, "optional": false, "lunch": false, "time": "#8"}, {"id": 9, "key": "apresse", "name": "A.PRESSE", "detail": "非必去｜专卖；select 已覆盖可跳", "area": "神宫前", "lat": 35.67255, "lng": 139.71235, "query": "A.PRESSE 神宮前", "fixed": false, "optional": true, "lunch": false, "time": "可选"}, {"id": 10, "key": "yoke", "name": "YOKE Aoyama", "detail": "男装旗舰", "area": "青山北", "lat": 35.6711, "lng": 139.7145, "query": "YOKE Aoyama Flagship Store", "fixed": false, "optional": false, "lunch": false, "time": "#10"}, {"id": 11, "key": "gapao", "name": "青山ガパオ食堂", "detail": "午饭选项｜泰餐", "area": "青山", "lat": 35.6665, "lng": 139.712, "query": "青山ガパオ食堂", "fixed": false, "optional": false, "lunch": true, "time": "午饭·三选一"}, {"id": 12, "key": "cdg", "name": "CDG 青山", "detail": "非必去｜select 已覆盖可跳", "area": "南青山", "lat": 35.6654, "lng": 139.7122, "query": "コムデギャルソン 青山", "fixed": false, "optional": true, "lunch": false, "time": "可选"}, {"id": 13, "key": "lechoppe", "name": "L'ÉCHOPPE 青山", "detail": "男装选品｜周六留意发售", "area": "青山", "lat": 35.6646, "lng": 139.7142, "query": "L'ÉCHOPPE 青山", "fixed": false, "optional": false, "lunch": false, "time": "#13"}, {"id": 14, "key": "hb", "name": "H BEAUTY&YOUTH", "detail": "南青山 3-14-17", "area": "南青山", "lat": 35.6653, "lng": 139.7148, "query": "H BEAUTY&YOUTH 南青山", "fixed": false, "optional": false, "lunch": false, "time": "#14"}, {"id": 15, "key": "comoli", "name": "COMOLI 南青山", "detail": "非必去", "area": "南青山", "lat": 35.662, "lng": 139.716, "query": "COMOLI 南青山", "fixed": false, "optional": true, "lunch": false, "time": "可选"}, {"id": 16, "key": "auralee", "name": "AURALEE TOKYO", "detail": "非必去", "area": "青山", "lat": 35.66114, "lng": 139.71644, "query": "AURALEE 青山", "fixed": false, "optional": true, "lunch": false, "time": "可选"}, {"id": 17, "key": "maxmara", "name": "Max Mara 青山", "detail": "女装", "area": "南青山", "lat": 35.66318, "lng": 139.71111, "query": "Max Mara 青山店", "fixed": false, "optional": false, "lunch": false, "time": "#17"}, {"id": 18, "key": "ldk", "name": "1LDK AOYAMA", "detail": "看 Maatee&Sons｜取替 LOFTMAN", "area": "神宫前／青山学院", "lat": 35.66364, "lng": 139.70869, "query": "1LDK AOYAMA", "fixed": false, "optional": false, "lunch": false, "time": "#18"}, {"id": 19, "key": "nanga", "name": "NANGA SHOP HARAJUKU", "detail": "重点｜女款黑羽绒｜出青山往涩谷顺路", "area": "原宿・明治通", "lat": 35.665683, "lng": 139.704148, "query": "NANGA SHOP HARAJUKU", "fixed": false, "optional": false, "lunch": false, "time": "#19"}, {"id": 20, "key": "sky", "name": "Shibuya Sky", "detail": "非必去｜有空且预约合适再上", "area": "涩谷", "lat": 35.658, "lng": 139.7023, "query": "Shibuya Sky", "fixed": false, "optional": true, "lunch": false, "time": "可选"}, {"id": 21, "key": "parco", "name": "涩谷 PARCO", "detail": "商场补逛", "area": "涩谷", "lat": 35.66221, "lng": 139.6992, "query": "渋谷PARCO", "fixed": false, "optional": false, "lunch": false, "time": "#21"}, {"id": 22, "key": "montbell", "name": "mont-bell 涩谷", "detail": "户外／羽绒备选", "area": "涩谷", "lat": 35.66242, "lng": 139.69757, "query": "モンベル 渋谷店", "fixed": false, "optional": false, "lunch": false, "time": "#22"}, {"id": 23, "key": "araiya", "name": "新井屋 渋谷", "detail": "18:00 固定｜道玄坂 2-19-13 · HRCLRT", "area": "涩谷・道玄坂", "lat": 35.65934, "lng": 139.69632, "query": "焼肉ホルモン 新井屋 渋谷", "fixed": true, "optional": false, "lunch": false, "time": "18:00"}]}};
+let lunchKey = 'kawakami';
+let places = variants[lunchKey].places;
+const map = L.map('map').setView([35.6665,139.707],14);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
+let markers={}, routeLine=null, showOptional=true, showRoute=true;
+const done=new Set();
+function gmaps(p){return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(p.query+' Tokyo');}
+function icon(p){
+  let bg = p.fixed ? '#d95b26' : p.lunch ? '#0f7a45' : p.optional ? '#8a94a6' : '#2857d8';
+  return L.divIcon({className:'',html:`<div style="width:28px;height:28px;border-radius:50%;background:${bg};border:2px solid white;box-shadow:0 2px 8px #0004;color:white;font-weight:700;font-size:12px;display:grid;place-items:center">${p.id}</div>`,iconSize:[28,28],iconAnchor:[14,14]});
+}
+function popup(p){return `<b>${p.id}. ${p.name}</b><br>${p.detail}<br><small>${p.area} · ${p.time||''}</small><br><a target="_blank" href="${gmaps(p)}">在 Google 地图中核对位置 ↗</a>`;}
+function visiblePlaces(){return places.filter(p=>showOptional || (!p.optional));}
+function render(){
+  Object.values(markers).forEach(m=>map.removeLayer(m)); markers={};
+  visiblePlaces().forEach(p=>{
+    markers[p.id]=L.marker([p.lat,p.lng],{icon:icon(p)}).addTo(map).bindPopup(popup(p));
+  });
+  if(routeLine){map.removeLayer(routeLine);routeLine=null}
+  if(showRoute){
+    const pts=visiblePlaces().map(p=>[p.lat,p.lng]);
+    if(pts.length>1){
+      routeLine=L.polyline(pts,{color:'#2857d8',weight:3,opacity:.7,dashArray:'7 8'}).addTo(map);
+      map.fitBounds(routeLine.getBounds().pad(.08));
+    }
+  }
+  const v=variants[lunchKey];
+  document.getElementById('routeMeta').textContent = `当前：${v.label} · 必去骨架约 ${v.must_m} m · 含可选约 ${v.full_m} m`;
+  renderList();
+}
+function renderList(){
+  const el=document.getElementById('stops'); el.innerHTML='';
+  visiblePlaces().forEach(p=>{
+    const row=document.createElement('div');
+    row.className='stop'+(p.fixed?' fixed':'')+(p.optional?' optional':'')+(p.lunch?' lunch':'');
+    row.innerHTML=`<div class="num">${p.id}</div><div><label><input type="checkbox" ${done.has(p.key)?'checked':''} data-done="${p.key}"><span class="stop-name" style="${done.has(p.key)?'text-decoration:line-through;color:#8992a2':''}">${p.name}</span></label><div class="stop-meta">${p.detail}<br>${p.area} · ${p.time||''}</div></div><div class="stop-actions"><a href="#" data-focus="${p.id}">定位</a><a target="_blank" href="${gmaps(p)}">地图 ↗</a></div>`;
+    el.appendChild(row);
+  });
+  el.querySelectorAll('[data-done]').forEach(c=>c.addEventListener('change',e=>{const key=e.target.dataset.done;e.target.checked?done.add(key):done.delete(key);renderList()}));
+  el.querySelectorAll('[data-focus]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();const id=+a.dataset.focus;const p=places.find(x=>x.id===id);map.setView([p.lat,p.lng],16);markers[id]?.openPopup()}));
+}
+function setLunch(key){
+  lunchKey=key; places=variants[key].places; done.clear();
+  document.querySelectorAll('.lunchBtn').forEach(b=>b.classList.toggle('active', b.dataset.lunch===key));
+  render();
+}
+document.querySelectorAll('.lunchBtn').forEach(b=>b.addEventListener('click',()=>setLunch(b.dataset.lunch)));
+document.getElementById('allBtn').onclick=()=>{showOptional=true;document.getElementById('allBtn').classList.add('active');document.getElementById('mustBtn').classList.remove('active');render()};
+document.getElementById('mustBtn').onclick=()=>{showOptional=false;document.getElementById('mustBtn').classList.add('active');document.getElementById('allBtn').classList.remove('active');render()};
+document.getElementById('routeBtn').onclick=()=>{showRoute=!showRoute;document.getElementById('routeBtn').classList.toggle('active',showRoute);render()};
+document.getElementById('clearBtn').onclick=()=>{done.clear();renderList()};
+render();
+</script>
+</body></html>
