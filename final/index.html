@@ -959,7 +959,7 @@ function setDay(d){DAY=d;LS.s("day",d);try{history.replaceState(null,"",d===3?"#
 addEventListener("hashchange",()=>{if(location.hash==="#airport"&&DAY!==3)setDay(3);else if(location.hash!=="#airport"&&DAY===3)setDay(2)});
 function render(){const r=curPos();if(DAY==null)DAY=r.d>=0?r.d:0;if(DAY===3){$("#tabs").innerHTML=TABS(3);if(LM){LM.remove();LM=null;LMday=-1}$("#main").className="apm";$("#main").innerHTML=AP_HTML;apInit();nowBar();return}$("#main").className="";const d=DAY,D=DAYS[d],L=items(d);
  $("#tabs").innerHTML=TABS(d);
- let h=`<section class="dh"><h2>${D.tab} · ${esc(D.title)}</h2><div class="sum">${esc(D.sum)}</div><div class="meta"><span class="chip">🌇 日落 ≈${D.sun}</span><a class="chip" href="${D.wx}" target="_blank" rel="noopener">🌤 天气 · ${esc(D.wxl)} ↗</a><span class="chip">📍 ${esc(D.zn)}</span></div>${miniMap(d)}</section><div class="tl">`;
+ let h=`<section class="dh"><h2>${D.tab} · ${esc(D.title)}</h2><div class="sum">${esc(D.sum)}</div><div class="meta"><span class="chip">🌇 日落 ≈${D.sun}</span><a class="chip" href="${D.wx}" target="_blank" rel="noopener">🌤 天气 · ${esc(D.wxl)} ↗</a>${D.cw?`<a class="chip" href="${D.cw}">🗺 ${esc(D.cwl||"Citywalk")} ↗</a>`:""}<span class="chip">📍 ${esc(D.zn)}</span></div>${miniMap(d)}</section><div class="tl">`;
  L.forEach((e,i)=>{const p=P[e.p];const cur=r.d===d&&r.c===i;
   const ss=normStops(e);
   const peers=e.either&&e.either.length;
