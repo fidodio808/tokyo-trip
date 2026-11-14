@@ -782,15 +782,31 @@ details.more{margin-top:6px;font-size:13px}details.more summary{color:#6b7280;cu
  .sh{align-items:center;justify-content:center;padding:24px}
  .sp{max-width:600px;border-radius:18px;max-height:85vh;padding-bottom:18px}
 }
-@media (min-width:1100px){
- .top{padding-left:max(20px,calc((100vw - 1240px)/2));padding-right:max(20px,calc((100vw - 1240px)/2))}
- main:not(.apm){max-width:1240px;display:grid;grid-template-columns:minmax(380px,460px) minmax(0,1fr);column-gap:20px;align-items:start}
- main:not(.apm)>.dh{grid-column:1;grid-row:1 / span 3;position:sticky;top:166px}
+@media (min-width:880px) and (min-height:520px){
+ .top{padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right),96px)}
+ main:not(.apm){max-width:none;width:100%;display:grid;grid-template-columns:minmax(320px,calc(50% - 8px)) minmax(0,1fr);column-gap:16px;align-items:start;padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right))}
+ main:not(.apm)>.dh{grid-column:1;grid-row:1 / span 3;position:sticky;top:var(--top-h,148px)}
  main:not(.apm)>.tl,main:not(.apm)>.near,main:not(.apm)>.ft{grid-column:2}
  main:not(.apm)>.tl{margin-top:0}
- main:not(.apm) .mm{height:calc(100vh - 360px);min-height:300px}
- main:not(.apm) .mm.big{height:calc(100vh - 230px)}
+ main:not(.apm) .mm{height:calc(100dvh - var(--top-h,148px) - 176px);min-height:200px}
+ main:not(.apm) .mm.big{height:calc(100dvh - var(--top-h,148px) - 136px)}
  main.apm{max-width:760px}
+}
+@media (min-width:880px) and (max-height:700px){
+ .top{padding-top:calc(env(safe-area-inset-top) + 4px);padding-bottom:6px}
+ .ttl{font-size:15px}
+ .now{margin-top:4px;padding:6px 8px}
+ .tabs{margin-top:6px}
+ .tabs button{padding:5px 2px}
+ .dh{padding:10px}
+ .dh h2{font-size:16px}
+ .dh .sum{margin:2px 0 4px}
+}
+@media (min-width:1100px) and (min-height:520px){
+ .top{padding-left:max(20px,calc((100vw - 1240px)/2));padding-right:max(20px,env(safe-area-inset-right),calc((100vw - 1240px)/2))}
+ main:not(.apm){max-width:1240px;width:auto;grid-template-columns:minmax(380px,460px) minmax(0,1fr);column-gap:20px;padding-left:12px;padding-right:12px}
+ main:not(.apm) .mm{height:calc(100dvh - var(--top-h,166px) - 200px);min-height:300px}
+ main:not(.apm) .mm.big{height:calc(100dvh - var(--top-h,166px) - 70px)}
  .ph{max-height:260px}
 }
 </style></head><body>
@@ -957,7 +973,7 @@ const TABS=d=>DAYS.map((x,i)=>`<button class="${i===d?"on":""}" onclick="setDay(
 let DAY=location.hash==="#airport"?3:LS.g("day",null);if(DAY===3&&location.hash!=="#airport"){try{history.replaceState(null,"","#airport")}catch(e){}}
 function setDay(d){DAY=d;LS.s("day",d);try{history.replaceState(null,"",d===3?"#airport":location.pathname+location.search)}catch(e){}render();scrollTo(0,0)}
 addEventListener("hashchange",()=>{if(location.hash==="#airport"&&DAY!==3)setDay(3);else if(location.hash!=="#airport"&&DAY===3)setDay(2)});
-function render(){const r=curPos();if(DAY==null)DAY=r.d>=0?r.d:0;if(DAY===3){$("#tabs").innerHTML=TABS(3);if(LM){LM.remove();LM=null;LMday=-1}$("#main").className="apm";$("#main").innerHTML=AP_HTML;apInit();nowBar();return}$("#main").className="";const d=DAY,D=DAYS[d],L=items(d);
+function render(){const r=curPos();if(DAY==null)DAY=r.d>=0?r.d:0;if(DAY===3){$("#tabs").innerHTML=TABS(3);if(LM){LM.remove();LM=null;LMday=-1}$("#main").className="apm";$("#main").innerHTML=AP_HTML;apInit();nowBar();syncTopH();return}$("#main").className="";const d=DAY,D=DAYS[d],L=items(d);
  $("#tabs").innerHTML=TABS(d);
  let h=`<section class="dh"><h2>${D.tab} · ${esc(D.title)}</h2><div class="sum">${esc(D.sum)}</div><div class="meta"><span class="chip">🌇 日落 ≈${D.sun}</span><a class="chip" href="${D.wx}" target="_blank" rel="noopener">🌤 天气 · ${esc(D.wxl)} ↗</a>${D.cw?`<a class="chip" href="${D.cw}">🗺 ${esc(D.cwl||"Citywalk")} ↗</a>`:""}<span class="chip">📍 ${esc(D.zn)}</span></div>${miniMap(d)}</section><div class="tl">`;
  L.forEach((e,i)=>{const p=P[e.p];const cur=r.d===d&&r.c===i;
@@ -973,7 +989,8 @@ function render(){const r=curPos();if(DAY==null)DAY=r.d>=0?r.d:0;if(DAY===3){$("
   h+=legHTML(legOf(d,i))});
  h+=`</div><details class="near" id="near"><summary>附近 · ${D.near.length}</summary>${D.near.map(id=>{const p=P[id];return`<div class="ni"><b>${esc(p.n)}</b>${p.pr?`<span class="quiet">${esc(p.pr)}</span>`:""}${p.d?`<div class="smeta">${esc(p.d)}</div>`:""}<div class="smap">${p.a?esc(p.a)+" · ":""}<a href="${gm(p)}" target="_blank" rel="noopener">Google 地图 ↗</a></div>${moreHTML(p,{skipD:1,skipAddr:!!p.a})}</div>`}).join("")}</details>
  <div class="ft">≈ 为估算（路程、票价、坐标）。营业时间来自原攻略数据（核对于 2026-10-12）或你提供的信息，标注「你提供」「未核实」的请出发前再确认。地图底图：国土地理院。</div>`;
- $("#main").innerHTML=h;initMap(d);nowBar()}
-render();setInterval(nowBar,30000);addEventListener("resize",()=>{LM&&LM.invalidateSize()});
+ $("#main").innerHTML=h;initMap(d);nowBar();syncTopH()}
+function syncTopH(){const t=document.querySelector(".top");if(t)document.documentElement.style.setProperty("--top-h",(t.offsetHeight+8)+"px");LM&&setTimeout(()=>LM.invalidateSize(),0)}
+render();setInterval(()=>{nowBar();syncTopH()},30000);addEventListener("resize",syncTopH);
 if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js",{scope:"./"}).catch(()=>{}));
 </script></body></html>
