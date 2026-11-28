@@ -1,11 +1,18 @@
-/* 东京攻略 Service Worker — 自动生成；版本随资源内容哈希变化 */
+/* 东京攻略 Service Worker。VER 跟资源集合走，不因路由修正改名：
+   已安装的 tokyo-pre 缓存要能直接复用，否则旧 worker 升级时会重新下载整包图片，
+   citywalk 会被壳页面多占一轮。导航回退只覆盖本目录的 index，不能吞掉 /citywalk/ 和 /final/。 */
 const VER="8d0b91cc59";
 const PRE="tokyo-pre-"+VER, RT="tokyo-rt-"+VER, TILES="tokyo-tiles-v1", TILE_MAX=300;
 const ASSETS=["index.html", "manifest.json", "icons/icon-180.png", "icons/icon-192.png", "icons/icon-512.png", "img/2121-1.webp", "img/2121-2.webp", "img/afuri-1.webp", "img/afurinakame-1.webp", "img/afuriroppongi-1.webp", "img/arabica-1.webp", "img/arise-1.webp", "img/asakura-1.webp", "img/asakura-2.webp", "img/azabu-1.webp", "img/azabu-2.webp", "img/azamarket-1.webp", "img/azashop-1.webp", "img/azashop-2.webp", "img/bb-1.webp", "img/beamsjapan-1.webp", "img/biocaf-1.webp", "img/bluebottle-1.webp", "img/cityview-1.webp", "img/cityview-2.webp", "img/d47-1.webp", "img/donut-1.webp", "img/egp-1.webp", "img/egp-2.webp", "img/fuglen-1.webp", "img/fukadaso-1.webp", "img/fukagawa-1.webp", "img/fukagawa-2.webp", "img/fuunji-1.webp", "img/gatou-1.webp", "img/goldengai-1.webp", "img/gyoen-1.webp", "img/gyozaro-1.webp", "img/gyre-1.webp", "img/harakado-1.webp", "img/hino-1.webp", "img/hino-2.webp", "img/hotel-1.webp", "img/hyotan-1.webp", "img/ichiranshibuya-1.webp", "img/ichiranshibuya-2.webp", "img/isetan-1.webp", "img/ivy-1.webp", "img/kawakami-1.webp", "img/kirin-1.webp", "img/kitsune-1.webp", "img/kiyosumi-1.webp", "img/kiyosumi-2.webp", "img/littlenap-1.webp", "img/logroad-1.webp", "img/logroad-2.webp", "img/maisen-1.webp", "img/mameya-1.webp", "img/meguro-1.webp", "img/meguro-2.webp", "img/meiji-1.webp", "img/mento-1.webp", "img/miya-1.webp", "img/miya-2.webp", "img/miyashiro-1.webp", "img/miyota-1.webp", "img/mot-1.webp", "img/mot-2.webp", "img/motomura-1.webp", "img/nacamo-1.webp", "img/nakajima-1.webp", "img/nature-1.webp", "img/nature-2.webp", "img/newoman-1.webp", "img/nezu-1.webp", "img/nezu-2.webp", "img/nodaiwa-1.webp", "img/node-1.webp", "img/node-2.webp", "img/nozy-1.webp", "img/ogawa-1.webp", "img/okura-1.webp", "img/omoide-1.webp", "img/onibus-1.webp", "img/ota-1.webp", "img/ota-2.webp", "img/pannya-1.webp", "img/parco-1.webp", "img/parco-2.webp", "img/paulbassett-1.webp", "img/photo-1.webp", "img/photo-2.webp", "img/potpurri-1.webp", "img/pulsare-1.webp", "img/reload-1.webp", "img/roastery-1.webp", "img/saigo-1.webp", "img/shiba-1.webp", "img/shozo-1.webp", "img/sky-1.webp", "img/sky-2.webp", "img/skyroom-1.webp", "img/spiral-1.webp", "img/sunny-1.webp", "img/sushiazabu-1.webp", "img/tagetsu-1.webp", "img/taro-1.webp", "img/taro-2.webp", "img/teahouse-1.webp", "img/teamlab-1.webp", "img/toranomon-1.webp", "img/toritake-1.webp", "img/toriyoshi-1.webp", "img/tower-1.webp", "img/tower-2.webp", "img/tsite-1.webp", "img/ukai-1.webp", "img/uobei-1.webp", "img/yokocho-1.webp", "img/yoroniku-1.webp", "img/yoyogi-1.webp", "img/yoyogi-2.webp"];
-self.addEventListener("install",e=>{e.waitUntil(caches.open(PRE).then(c=>Promise.all(ASSETS.map(u=>c.add(new Request(u,{cache:"reload"})).catch(()=>{})))).then(()=>self.skipWaiting()))});
-self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k.startsWith("tokyo-")&&k!==PRE&&k!==RT&&k!==TILES).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
+self.addEventListener("install",e=>{e.waitUntil(caches.open(PRE).then(c=>Promise.all(ASSETS.map(u=>c.match(u).then(hit=>hit||c.add(new Request(u,{cache:"reload"})).catch(()=>{}))))).then(()=>self.skipWaiting()))});
+self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k.startsWith("tokyo-")&&k!==PRE&&k!==RT&&k!==TILES).map(k=>caches.delete(k)))).then(()=>self.clients.claim()).then(()=>{
+ /* client.navigate() 放进 waitUntil 会和激活互相等待，worker 停在 activating。激活完成后再打开嵌套页。 */
+ setTimeout(releaseNestedClients,0);
+}))});
 const BASE=new URL("./",self.registration.scope);
 const IDX=new URL("index.html",BASE).href;
+function isShellDocument(u){return u.origin===BASE.origin&&(u.pathname===BASE.pathname||u.pathname===BASE.pathname+"index.html")}
+function releaseNestedClients(){return self.clients.matchAll({type:"window"}).then(cs=>{for(const c of cs){let u;try{u=new URL(c.url)}catch(_){continue}if(u.origin!==BASE.origin||!u.href.startsWith(BASE.href)||isShellDocument(u))continue;c.navigate(c.url)}}).catch(()=>{})}
 async function trimTiles(){try{const c=await caches.open(TILES);const ks=await c.keys();for(let i=0;i<ks.length-TILE_MAX;i++)await c.delete(ks[i])}catch(e){}}
 async function swrIndex(e){const c=await caches.open(PRE);const hit=await c.match(IDX);
  const net=fetch(IDX,{cache:"no-cache"}).then(r=>{if(r&&r.ok)return c.put(IDX,r.clone()).then(()=>r);return r}).catch(()=>null);
@@ -15,5 +22,6 @@ async function tile(e){const c=await caches.open(TILES);const hit=await c.match(
 self.addEventListener("fetch",e=>{const req=e.request;if(req.method!=="GET")return;let u;try{u=new URL(req.url)}catch(_){return}
  if(u.hostname==="cyberjapandata.gsi.go.jp"){e.respondWith(tile(e));return}
  if(u.origin!==self.location.origin||!u.href.startsWith(BASE.href))return;
+ if(req.mode==="navigate"&&!isShellDocument(u))return;
  if(req.mode==="navigate"||u.href===IDX||u.href===BASE.href){e.respondWith(swrIndex(e));return}
  e.respondWith(cacheFirst(req))});
